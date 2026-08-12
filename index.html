@@ -24,6 +24,51 @@
             width: 100%;
             max-width: 650px;
         }
+        /* Admin Panel / Form Alanı */
+        .admin-card {
+            background: #181822;
+            border: 1px dashed #00f2fe;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .admin-card h2 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            color: #00f2fe;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #2a2a3a;
+            background: #0f0f13;
+            color: #fff;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        textarea {
+            resize: vertical;
+            height: 80px;
+        }
+        .btn-add {
+            background: #00f2fe;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+        .btn-add:hover {
+            background: #4facfe;
+        }
+
+        /* Script Kartları */
         .script-card {
             background: #1a1a24;
             border: 1px solid #2a2a3a;
@@ -37,7 +82,6 @@
             font-size: 1.25rem;
             font-weight: bold;
             margin-bottom: 6px;
-            color: #ffffff;
         }
         .script-desc {
             font-size: 0.9rem;
@@ -53,15 +97,9 @@
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .btn-copy:hover {
-            background: #4facfe;
-            transform: translateY(-1px);
         }
         .btn-copy.copied {
             background: #00e676 !important;
-            color: #000;
         }
     </style>
 </head>
@@ -69,14 +107,27 @@
 
     <h1>Klakz Script Hub</h1>
 
-    <div class="container" id="script-list">
-        <div class="script-card">
-            <div class="script-title">Yükleniyor...</div>
-            <div class="script-desc">Veritabanından scriptler getiriliyor.</div>
+    <div class="container">
+        <!-- Script Ekleme Formu -->
+        <div class="admin-card">
+            <h2>yeni Script Ekle</h2>
+            <div class="form-group">
+                <input type="text" id="title" placeholder="Script Başlığı (Örn: Blox Fruits Auto Farm)">
+            </div>
+            <div class="form-group">
+                <input type="text" id="desc" placeholder="Açıklama (Örn: Otomatik level ve item kasma)">
+            </div>
+            <div class="form-group">
+                <textarea id="code" placeholder="Script Kodunu Buraya Yapıştırın (loadstring...)"></textarea>
+            </div>
+            <button class="btn-add" onclick="addScript()">Veritabanına Gönder</button>
         </div>
+
+        <!-- Script Listesi -->
+        <div id="script-list"></div>
     </div>
 
-    <!-- Firebase App & Database SDK -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
@@ -84,6 +135,7 @@
       const firebaseConfig = {
         apiKey: "AIzaSyDpuJm6D9752OUXZ12L__agm3UmOI1I7Dw",
         authDomain: "klakznew.firebaseapp.com",
+        databaseURL: "https://klakznew-default-rtdb.firebaseio.com",
         projectId: "klakznew",
         storageBucket: "klakznew.firebasestorage.app",
         messagingSenderId: "238260974670",
@@ -94,7 +146,32 @@
       firebase.initializeApp(firebaseConfig);
       const database = firebase.database();
 
-      // Script Kopyalama İşlevi
+      // Otomatik Script Ekleme İşlevi
+      function addScript() {
+          const title = document.getElementById("title").value;
+          const desc = document.getElementById("desc").value;
+          const code = document.getElementById("code").value;
+
+          if (!title || !code) {
+              alert("Lütfen başlık ve kod alanlarını doldurun!");
+              return;
+          }
+
+          database.ref("scripts").push({
+              title: title,
+              desc: desc,
+              code: code
+          }).then(() => {
+              alert("Script başarıyla eklendi!");
+              document.getElementById("title").value = "";
+              document.getElementById("desc").value = "";
+              document.getElementById("code").value = "";
+          }).catch((error) => {
+              alert("Hata oluştu: " + error.message);
+          });
+      }
+
+      // Kopyalama İşlevi
       function copyScript(code, button) {
           navigator.clipboard.writeText(code).then(() => {
               const originalText = button.innerText;
@@ -104,12 +181,10 @@
                   button.innerText = originalText;
                   button.classList.remove("copied");
               }, 2000);
-          }).catch(err => {
-              alert("Kopyalama başarısız oldu: " + err);
           });
       }
 
-      // Firebase Realtime Database'den Canlı Veri Çekme
+      // Canlı Veri Dinleme ve Listeleme
       const scriptListDiv = document.getElementById("script-list");
       
       database.ref("scripts").on("value", (snapshot) => {
@@ -117,12 +192,7 @@
           const data = snapshot.val();
 
           if (!data) {
-              scriptListDiv.innerHTML = `
-                  <div class="script-card">
-                      <div class="script-title">Henüz Script Eklenmedi</div>
-                      <div class="script-desc">Firebase panelinden 'scripts' yoluna veri eklediğinde burada otomatik olarak görünecek.</div>
-                  </div>
-              `;
+              scriptListDiv.innerHTML = `<div class="script-card"><div class="script-title">Henüz Script Yok</div><div class="script-desc">Yukarıdaki formdan ilk scriptini ekleyebilirsin.</div></div>`;
               return;
           }
 
@@ -131,8 +201,8 @@
               const card = document.createElement("div");
               card.className = "script-card";
               card.innerHTML = `
-                  <div class="script-title">${item.title || 'Başlıksız Script'}</div>
-                  <div class="script-desc">${item.desc || 'Açıklama belirtilmedi.'}</div>
+                  <div class="script-title">${item.title}</div>
+                  <div class="script-desc">${item.desc || 'Açıklama yok.'}</div>
                   <button class="btn-copy" onclick="copyScript(\`${item.code}\`, this)">Scripti Kopyala</button>
               `;
               scriptListDiv.appendChild(card);
