@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Klakz Hub | Professional v3.5</title>
+    <title>Klakz Hub | Professional v3.6 - Ultimate Auth</title>
     
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'><rect width='100%' height='100%' rx='100' fill='%2312141c'/><path d='M160 120 v260 M200 250 L320 130 M200 250 L320 370' stroke='%2300ec64' stroke-width='45' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
 
@@ -67,11 +67,18 @@
         
         .theme-toggle-btn { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 12px; }
         
-        /* Özel E-posta Giriş Alanı Tasarımı */
-        .custom-login-box { display: flex; align-items: center; gap: 10px; }
-        .custom-login-box input { margin: 0; padding: 8px 12px !important; width: 200px; font-size: 13px; }
-        .custom-login-btn { background: var(--accent); color: #000; border: none; font-weight: bold; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; }
-        .custom-login-btn:hover { background: var(--accent-hover); }
+        /* Gelişmiş Üst Bar Giriş Butonları */
+        .auth-buttons-group { display: flex; gap: 10px; align-items: center; }
+        .nav-auth-btn { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
+        .nav-auth-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .nav-register-btn { background: var(--accent); color: #000; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
+        .nav-register-btn:hover { background: var(--accent-hover); }
+
+        /* Modal Form Stilleri */
+        .auth-modal-content { width: 400px; max-width: 90%; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 30px; box-sizing: border-box; position: relative; }
+        .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); }
+        .auth-tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; color: var(--text-muted); font-weight: 600; border-bottom: 2px solid transparent; }
+        .auth-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
         .auth-pulse { animation: pulseGlow 1.5s infinite; border: 2px solid var(--accent) !important; }
         @keyframes pulseGlow {
@@ -85,7 +92,7 @@
 
     <!-- Bildirim Şeridi -->
     <div id="announcementBar" class="announcement-bar">
-        <span>🎉 Klakz Hub v3.5 yayında! E-posta ile sorunsuz giriş sistemi aktif edildi.</span>
+        <span>🎉 Klakz Hub v3.6 yayında! Profesyonel Giriş Yap / Kaydol modal sistemi eklendi.</span>
         <button onclick="closeAnnouncement()">Kapat</button>
     </div>
 
@@ -113,11 +120,11 @@
             <div class="topbar">
                 <input type="text" id="searchInput" placeholder="Script ara..." oninput="filterScripts()" style="width: 250px; margin:0;">
                 
-                <!-- Güvenli E-posta Giriş Alanı -->
+                <!-- Üst Bar Hesap / Giriş Alanı -->
                 <div id="authArea">
-                    <div class="custom-login-box" id="loginFormContainer">
-                        <input type="email" id="emailInput" placeholder="E-posta adresin (@gmail.com)...">
-                        <button class="custom-login-btn" onclick="handleEmailLogin()">Giriş Yap</button>
+                    <div class="auth-buttons-group">
+                        <button class="nav-auth-btn" onclick="openAuthModal('login')">Giriş Yap</button>
+                        <button class="nav-register-btn" onclick="openAuthModal('register')">Kaydol</button>
                     </div>
                 </div>
             </div>
@@ -129,6 +136,33 @@
             <div class="content-body">
                 <div id="dynamic-content"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- Gelişmiş Giriş / Kaydol Modalı -->
+    <div class="modal-overlay" id="authModal" onclick="handleOverlayClick(event, 'authModal')">
+        <div class="auth-modal-content">
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="tabLoginBtn" onclick="switchAuthTab('login')">Giriş Yap</div>
+                <div class="auth-tab" id="tabRegisterBtn" onclick="switchAuthTab('register')">Kaydol</div>
+            </div>
+
+            <!-- Giriş Formu -->
+            <div id="loginFormSection">
+                <input type="email" id="loginEmail" placeholder="E-posta adresi">
+                <input type="password" id="loginPass" placeholder="Şifre">
+                <button class="submit-btn" onclick="executeLogin()">Giriş Yap</button>
+            </div>
+
+            <!-- Kayıt Formu -->
+            <div id="registerFormSection" style="display: none;">
+                <input type="text" id="regName" placeholder="Kullanıcı Adı">
+                <input type="email" id="regEmail" placeholder="E-posta adresi">
+                <input type="password" id="regPass" placeholder="Şifre oluştur">
+                <button class="submit-btn" onclick="executeRegister()">Hesap Oluştur</button>
+            </div>
+
+            <button style="background:none; border:none; color:var(--text-muted); width:100%; margin-top:15px; cursor:pointer;" onclick="closeAuthModal()">İptal / Kapat</button>
         </div>
     </div>
 
@@ -150,7 +184,8 @@
     </div>
 
     <script>
-        let authState = JSON.parse(localStorage.getItem('klakz_auth')) || { isLoggedIn: false, email: '' };
+        let authState = JSON.parse(localStorage.getItem('klakz_auth')) || { isLoggedIn: false, name: '', email: '' };
+        let usersDB = JSON.parse(localStorage.getItem('klakz_users_db')) || [];
         let favorites = JSON.parse(localStorage.getItem('klakz_favorites')) || [];
         let ideasList = JSON.parse(localStorage.getItem('klakz_ideas')) || [];
         
@@ -188,7 +223,7 @@
             },
             changelog: {
                 title: "🚀 Sürüm Notları",
-                content: `<div class="card"><h3>v3.5 Güncellemesi</h3><p style="color:var(--text-muted)">• Google hata veren harici popup sistemi yerine doğrudan **E-posta ile giriş** sistemi getirildi.<br>• Hata kodu alma derdi olmadan e-posta adresinle anında sisteme bağlanabilirsin.</p></div>`
+                content: `<div class="card"><h3>v3.6 Güncellemesi</h3><p style="color:var(--text-muted)">• Kapsamlı yerel **Giriş Yap / Kaydol** şifreli modal sistemi entegre edildi.<br>• Kullanıcı kayıt veritabanı tarayıcı hafızasına güvenli şekilde bağlanarak kalıcı hale getirildi.</p></div>`
             },
             ideas: {
                 title: "💡 Fikrini Paylaş",
@@ -238,25 +273,88 @@
             localStorage.setItem('klakz_announcement_closed', 'true');
         }
 
-        // --- E-POSTA İLE GİRİŞ SİSTEMİ ---
-        function handleEmailLogin() {
-            const emailInput = document.getElementById('emailInput').value.trim();
-            if(!emailInput || !emailInput.includes('@')) {
-                alert('Lütfen geçerli bir e-posta adresi girin!');
+        // --- AUTH MODAL & SİSTEMLERİ ---
+        function openAuthModal(mode) {
+            document.getElementById('authModal').style.display = 'flex';
+            switchAuthTab(mode);
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').style.display = 'none';
+        }
+
+        function switchAuthTab(mode) {
+            const loginSec = document.getElementById('loginFormSection');
+            const regSec = document.getElementById('registerFormSection');
+            const tabLogin = document.getElementById('tabLoginBtn');
+            const tabReg = document.getElementById('tabRegisterBtn');
+
+            if(mode === 'login') {
+                loginSec.style.display = 'block';
+                regSec.style.display = 'none';
+                tabLogin.classList.add('active');
+                tabReg.classList.remove('active');
+            } else {
+                loginSec.style.display = 'none';
+                regSec.style.display = 'block';
+                tabReg.classList.add('active');
+                tabLogin.classList.remove('active');
+            }
+        }
+
+        function executeRegister() {
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const pass = document.getElementById('regPass').value.trim();
+
+            if(!name || !email || !pass) {
+                alert('Lütfen tüm kayıt alanlarını doldurun!');
                 return;
             }
-            
-            authState = {
-                isLoggedIn: true,
-                email: emailInput
-            };
-            
+
+            const existing = usersDB.find(u => u.email === email);
+            if(existing) {
+                alert('Bu e-posta adresiyle zaten bir hesap kayıtlı!');
+                return;
+            }
+
+            const newUser = { name, email, pass };
+            usersDB.push(newUser);
+            localStorage.setItem('klakz_users_db', JSON.stringify(usersDB));
+
+            authState = { isLoggedIn: true, name, email };
             localStorage.setItem('klakz_auth', JSON.stringify(authState));
+
+            closeAuthModal();
             updateAuthUI();
+            alert('Kayıt başarılı! Hoş geldin, ' + name);
+        }
+
+        function executeLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+
+            if(!email || !pass) {
+                alert('Lütfen e-posta ve şifrenizi girin!');
+                return;
+            }
+
+            const user = usersDB.find(u => u.email === email && u.pass === pass);
+            if(!user) {
+                alert('E-posta veya şifre hatalı! Lütfen kontrol edin.');
+                return;
+            }
+
+            authState = { isLoggedIn: true, name: user.name, email: user.email };
+            localStorage.setItem('klakz_auth', JSON.stringify(authState));
+
+            closeAuthModal();
+            updateAuthUI();
+            alert('Giriş başarılı! Tekrar hoş geldin, ' + user.name);
         }
 
         function handleLogout() {
-            authState = { isLoggedIn: false, email: '' };
+            authState = { isLoggedIn: false, name: '', email: '' };
             localStorage.removeItem('klakz_auth');
             location.reload();
         }
@@ -266,16 +364,16 @@
             if(authState.isLoggedIn) {
                 authArea.innerHTML = `
                     <div class="user-pill">
-                        <span>📧</span>
-                        <span style="font-size:13px; font-weight:600;">${authState.email}</span>
+                        <span>👤</span>
+                        <span style="font-size:13px; font-weight:600;">${authState.name}</span>
                         <button onclick="handleLogout()" style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:11px; padding:0; margin-left:5px;" title="Çıkış Yap">Çıkış</button>
                     </div>
                 `;
             } else {
                 authArea.innerHTML = `
-                    <div class="custom-login-box" id="loginFormContainer">
-                        <input type="email" id="emailInput" placeholder="E-posta adresin (@gmail.com)...">
-                        <button class="custom-login-btn" onclick="handleEmailLogin()">Giriş Yap</button>
+                    <div class="auth-buttons-group">
+                        <button class="nav-auth-btn" onclick="openAuthModal('login')">Giriş Yap</button>
+                        <button class="nav-register-btn" onclick="openAuthModal('register')">Kaydol</button>
                     </div>
                 `;
             }
@@ -311,7 +409,8 @@
                 const authArea = document.getElementById('authArea');
                 authArea.classList.add('auth-pulse');
                 setTimeout(() => authArea.classList.remove('auth-pulse'), 3000);
-                alert('Yönetim paneline erişmek için önce sağ üstten e-postanla giriş yapmalısın!'); 
+                alert('Yönetim paneline erişmek için önce giriş yapmalı veya kaydolmalısın!'); 
+                openAuthModal('login');
                 return; 
             }
             document.getElementById('adminModal').style.display = 'flex';
