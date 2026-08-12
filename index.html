@@ -115,7 +115,7 @@
                 <div id="authArea">
                     <!-- Google Resmi Giriş Butonu Alanı -->
                     <div id="g_id_onload"
-                         data-client_id="BURAYA_GOOGLE_CLOUD_DAN_ALDIGIN_CLIENT_ID_YAZ"
+                         data-client_id="874152244597-eu3sh38icjn179bcr53e0mqqigrlf7ob.apps.googleusercontent.com"
                          data-callback="handleCredentialResponse"
                          data-auto_prompt="false">
                     </div>
@@ -190,7 +190,7 @@
             },
             changelog: {
                 title: "🚀 Sürüm Notları",
-                content: `<div class="card"><h3>v3.3 Güncellemesi</h3><p style="color:var(--text-muted)">• Discord Webhook entegrasyonu eklendi.<br>• Akıllı Giriş uyarı yönetimi ve Tema hafızası aktif edildi.</p></div>`
+                content: `<div class="card"><h3>v3.3 Güncellemesi</h3><p style="color:var(--text-muted)">• Google OAuth entegrasyonu tamamlandı.<br>• Akıllı Giriş uyarı yönetimi ve Tema hafızası aktif edildi.</p></div>`
             },
             ideas: {
                 title: "💡 Fikrini Paylaş",
@@ -210,7 +210,7 @@
                         <h3>Bize Ulaşın</h3>
                         <p style="color:var(--text-muted)">Bir hata bildirmek, öneri sunmak veya destek almak için aşağıdaki kanalları kullanabilirsiniz:</p>
                         <ul style="color:var(--text-main); line-height: 2; padding-left: 20px;">
-                            <li>💬 <b>Discord:</b> discord.gg/klakz</li>
+                            <li>💬 <b>Discord:</b> <a href="https://discord.gg/zT3W2BNMq" target="_blank" style="color:var(--accent); text-decoration:none;">discord.gg/zT3W2BNMq</a></li>
                             <li>📧 <b>E-posta:</b> destek@klakzhub.com</li>
                             <li>💻 <b>GitHub:</b> github.com/lrbear</li>
                         </ul>
@@ -370,22 +370,10 @@
             grid.innerHTML = h;
         }
 
-        // --- DISCORD WEBHOOK GÖNDERME FONKSİYONU ---
-        function sendToDiscord(content) {
-            const webhookUrl = "BURAYA_DISCORD_WEBHOOK_URL_YAZ";
-            if(webhookUrl.includes("BURAYA")) return; // URL eklenmediyse hata vermesin
-            
-            fetch(webhookUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ content: content })
-            }).catch(err => console.log("Webhook gönderilemedi:", err));
-        }
-
         function adminAddScript() {
             const g = document.getElementById('targetGameSelect').value;
             const t = document.getElementById('newScriptTitle').value;
-            const d = document.getElementById('newScriptDesc'].value;
+            const d = document.getElementById('newScriptDesc').value;
             const s = document.getElementById('newScriptStatus').value;
             const c = document.getElementById('newScriptCode').value;
             if(!t || !c) return alert('Başlık ve kod zorunludur!');
@@ -404,9 +392,6 @@
             categoryData[g].content = categoryData[g].content.replace('</div>', card + '</div>');
             localStorage.setItem('klakz_category_data', JSON.stringify(categoryData));
             
-            // Discord'a Bildirim Gönder
-            sendToDiscord(`🚀 **Yeni Script Eklendi!**\n📌 Kategori: ${categoryData[g].title}\n📝 Başlık: ${t}\n👤 Ekleyen: ${authState.name}`);
-
             closeAdminPanel();
             alert('Script başarıyla eklendi!');
             if(currentKey === g) switchCategory(g);
@@ -419,9 +404,6 @@
             ideasList.unshift({ platform: p, text: t });
             localStorage.setItem('klakz_ideas', JSON.stringify(ideasList));
             
-            // Discord'a Fikir Bildirimi Gönder
-            sendToDiscord(`💡 **Yeni Fikir / Öneri!**\n🎮 Platform: ${p}\n💬 Mesaj: ${t}`);
-
             renderPublicIdeas();
             alert('Fikriniz iletildi!');
         }
