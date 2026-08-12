@@ -3,211 +3,1351 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Klakz Hub | Script Center</title>
+    <title>Klakz Hub - Gelişmiş Yönetim & Premium Paneli</title>
     <style>
+        /* --- GENEL RESET VE STİLLER --- */
         body {
-            background-color: #0f0f13;
+            background-color: #0b0c10;
             color: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sol Menü */
+        .sidebar {
+            width: 260px;
+            background-color: #12141c;
+            border-right: 1px solid #1f2330;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            padding: 40px 20px;
-            margin: 0;
-        }
-        h1 {
-            color: #00f2fe;
-            margin-bottom: 25px;
-            text-shadow: 0 0 12px rgba(0, 242, 254, 0.4);
-        }
-        .container {
-            width: 100%;
-            max-width: 650px;
-        }
-        /* Admin Panel / Form Alanı */
-        .admin-card {
-            background: #181822;
-            border: 1px dashed #00f2fe;
-            border-radius: 12px;
             padding: 20px;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+
+        .logo-area {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00ec64;
             margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .admin-card h2 {
-            margin-top: 0;
-            font-size: 1.1rem;
-            color: #00f2fe;
+
+        .menu-category {
+            font-size: 11px;
+            color: #7a828e;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
         }
-        .form-group {
-            margin-bottom: 12px;
-        }
-        input, textarea {
+
+        .menu-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: #a0a6b8;
+            cursor: pointer;
+            margin-bottom: 5px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: block;
+            border: none;
+            background: none;
             width: 100%;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #2a2a3a;
-            background: #0f0f13;
-            color: #fff;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background-color: #1a1c23;
+            color: #ffffff;
+        }
+
+        .menu-item.active {
+            border-left: 3px solid #00ec64;
+        }
+
+        /* Ana İçerik Alanı */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        /* Üst Bar */
+        .topbar {
+            height: 70px;
+            border-bottom: 1px solid #1f2330;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            box-sizing: border-box;
+        }
+
+        .search-box input {
+            background-color: #15171e !important;
+            border: 1px solid #2d3139 !important;
+            border-radius: 20px !important;
+            padding: 10px 20px !important;
+            color: #ffffff !important;
+            width: 300px;
+            outline: none;
+        }
+
+        .topbar-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .admin-btn {
+            background-color: #1f2330;
+            color: #00ec64;
+            border: 1px solid #00ec64;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: none;
+        }
+
+        .admin-btn:hover {
+            background-color: #00ec64;
+            color: #000;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #00ec64, #00b34a);
+            color: #000000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* İçerik Gövdesi */
+        .content-body {
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        /* Form Stilleri */
+        textarea, 
+        input[type="text"], 
+        input[type="search"], 
+        input[type="email"], 
+        input[type="password"] {
+            background-color: #1a1c23 !important;
+            color: #ffffff !important;
+            border: 1px solid #2d3139 !important;
+            border-radius: 8px !important;
+            padding: 12px !important;
+            outline: none !important;
+            width: 100%;
             box-sizing: border-box;
             font-family: inherit;
         }
-        textarea {
-            resize: vertical;
-            height: 80px;
-        }
-        .btn-add {
-            background: #00f2fe;
-            color: #000;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-        }
-        .btn-add:hover {
-            background: #4facfe;
+
+        textarea:focus, 
+        input:focus {
+            border-color: #00ec64 !important;
+            box-shadow: 0 0 8px rgba(0, 236, 100, 0.25) !important;
         }
 
-        /* Script Kartları */
-        .script-card {
-            background: #1a1a24;
-            border: 1px solid #2a2a3a;
+        textarea::placeholder, 
+        input::placeholder {
+            color: #7a828e !important;
+        }
+
+        /* Kart Yapısı */
+        .card {
+            background-color: #15171e;
+            border: 1px solid #1f2330;
             border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-left: 4px solid #00f2fe;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            padding: 25px;
+            margin-bottom: 30px;
         }
-        .script-title {
-            font-size: 1.25rem;
+
+        .card h3 {
+            margin-top: 0;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #00ec64, #00b34a) !important;
+            color: #000000 !important;
             font-weight: bold;
-            margin-bottom: 6px;
-        }
-        .script-desc {
-            font-size: 0.9rem;
-            color: #a0a0b0;
-            margin-bottom: 15px;
-            line-height: 1.4;
-        }
-        .btn-copy {
-            background: #00f2fe;
-            color: #000;
             border: none;
-            padding: 10px 18px;
-            border-radius: 6px;
-            font-weight: bold;
+            border-radius: 8px;
+            padding: 12px 20px;
             cursor: pointer;
+            transition: opacity 0.2s ease;
+            margin-top: 5px;
+            width: 100%;
         }
-        .btn-copy.copied {
-            background: #00e676 !important;
+
+        .submit-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Google ile Giriş Butonu */
+        .google-login-btn {
+            background-color: #ffffff;
+            color: #212529;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: background-color 0.2s;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .google-login-btn:hover {
+            background-color: #f1f3f5;
+        }
+
+        /* Script Grid */
+        .script-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .script-card {
+            background-color: #12141c;
+            border: 1px solid #1f2330;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: relative;
+        }
+
+        .script-title {
+            font-weight: bold;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .script-desc {
+            font-size: 13px;
+            color: #a0a6b8;
+            flex: 1;
+        }
+
+        .copy-btn {
+            background-color: #1f2330;
+            color: #00ec64;
+            border: 1px solid #00ec64;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background-color: #00ec64;
+            color: #000;
+        }
+
+        /* Modal Tasarımları */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-box {
+            background-color: #15171e;
+            border: 1px solid #2d3139;
+            border-radius: 16px;
+            width: 600px;
+            max-width: 90%;
+            padding: 30px;
+            box-sizing: border-box;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: #7a828e;
+            font-size: 22px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close-modal:hover {
+            color: #fff;
+        }
+
+        .google-account-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #12141c;
+            border: 1px solid #1f2330;
+            padding: 12px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 10px;
+        }
+
+        .google-account-item:hover {
+            background: #1a1c23;
+            border-color: #4285F4;
+        }
+
+        .google-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4285F4, #34A853);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .idea-item-admin, .mail-item-admin, .account-item-admin, .game-item-admin {
+            background-color: #12141c;
+            border: 1px solid #1f2330;
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .delete-btn {
+            background-color: rgba(255, 77, 77, 0.15);
+            color: #ff4d4d;
+            border: 1px solid rgba(255, 77, 77, 0.3);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .delete-btn:hover {
+            background-color: #ff4d4d;
+            color: #fff;
+        }
+
+        .vip-badge {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #000;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .admin-nav-btn {
+            flex: 1;
+            padding: 8px 5px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+
+        /* Mobil Uyumluluk */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            .topbar {
+                padding: 0 15px;
+            }
+            .search-box input {
+                width: 150px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <h1>Klakz Script Hub</h1>
+    <!-- Sol Menü -->
+    <div class="sidebar">
+        <div class="logo-area">⚡ KLAKZ HUB</div>
+        
+        <div class="menu-category">Oyun Kategorileri</div>
+        <div id="sidebarCategories"></div>
 
-    <div class="container">
-        <!-- Script Ekleme Formu -->
-        <div class="admin-card">
-            <h2>yeni Script Ekle</h2>
-            <div class="form-group">
-                <input type="text" id="title" placeholder="Script Başlığı (Örn: Blox Fruits Auto Farm)">
-            </div>
-            <div class="form-group">
-                <input type="text" id="desc" placeholder="Açıklama (Örn: Otomatik level ve item kasma)">
-            </div>
-            <div class="form-group">
-                <textarea id="code" placeholder="Script Kodunu Buraya Yapıştırın (loadstring...)"></textarea>
-            </div>
-            <button class="btn-add" onclick="addScript()">Veritabanına Gönder</button>
-        </div>
-
-        <!-- Script Listesi -->
-        <div id="script-list"></div>
+        <div style="margin-top: 20px;" class="menu-category">Özel Alanlar</div>
+        <button class="menu-item" onclick="switchCategory('competition', this)">🏆 Script Yarışması</button>
+        <button class="menu-item" onclick="switchCategory('ideas', this)">💡 Fikrini Paylaş</button>
+        <button class="menu-item" onclick="switchCategory('contact', this)">📧 İletişim / Gmail Gönder</button>
+        <button class="menu-item" onclick="switchCategory('premium', this)" style="color: #ffd700; font-weight: bold;">⭐ Premium Hub (VIP)</button>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <!-- Ana İçerik -->
+    <div class="main-content">
+        <!-- Üst Bar -->
+        <div class="topbar">
+            <div class="search-box">
+                <input type="search" placeholder="Ara...">
+            </div>
+            <div class="topbar-actions">
+                <button class="admin-btn" id="adminPanelBtn" onclick="openAdminPanel()">⚙️ Yönetim Paneli</button>
+                <button class="login-btn" id="authBtn" onclick="openLoginModal()">👤 Giriş Yap</button>
+            </div>
+        </div>
+
+        <!-- Gövde -->
+        <div class="content-body">
+            <div id="dynamic-content"></div>
+        </div>
+    </div>
+
+    <!-- Giriş Yap Modal -->
+    <div class="modal-overlay" id="loginModal" onclick="handleOverlayClick(event, 'loginModal')">
+        <div class="modal-box" style="width: 440px;">
+            <div class="modal-header">
+                <h3 style="margin:0; color: #fff;">👤 Klakz Hub Oturum Açma</h3>
+                <button class="close-modal" onclick="closeLoginModal()">&times;</button>
+            </div>
+            <p style="color: #7a828e; font-size: 13px; margin-bottom: 20px;">Google hesabınızı seçerek bağlanın (@gmail.com zorunludur).</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <button class="google-login-btn" onclick="openGoogleAccountSelector()">
+                    <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.13 0-5.78-2.11-6.73-4.96H1.18v3.15C3.15 21.32 7.22 24 12 24z"/><path fill="#FBBC05" d="M5.27 14.24c-.25-.72-.38-1.49-.38-2.24s.13-1.52.38-2.24V6.6H1.18C.43 8.12 0 9.82 0 12s.43 3.88 1.18 5.4l4.09-3.16z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.22 0 3.15 2.68 1.18 6.6l4.09 3.15c.95-2.85 3.6-4.96 6.73-4.96z"/></svg>
+                    Google (Gmail) ile Giriş Yap
+                </button>
+
+                <div style="display: flex; align-items: center; text-align: center; color: #7a828e; font-size: 12px; margin: 5px 0;">
+                    <hr style="flex: 1; border-color: #2d3139;">
+                    <span style="padding: 0 10px;">VEYA YÖNETİCİ GİRİŞİ</span>
+                    <hr style="flex: 1; border-color: #2d3139;">
+                </div>
+
+                <input type="text" id="loginUser" placeholder="Kullanıcı Adı (admin)...">
+                <input type="password" id="loginPass" placeholder="Şifre (admin123)...">
+                <button class="submit-btn" onclick="handleLogin()">Giriş Yap</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Google Hesap Seçim Penceresi -->
+    <div class="modal-overlay" id="googleAccountModal" onclick="handleOverlayClick(event, 'googleAccountModal')">
+        <div class="modal-box" style="width: 440px; text-align: center;">
+            <div style="margin-bottom: 15px;">
+                <h3 style="margin: 10px 0 5px 0; color: #fff; font-size: 20px;">Hesap seçin</h3>
+                <p style="color: #7a828e; font-size: 13px; margin: 0;">Devam etmek için bir Gmail hesabı seçin</p>
+            </div>
+            <div id="googleAccountsList" style="text-align: left; margin-top: 20px; max-height: 220px; overflow-y: auto;"></div>
+            <button class="google-account-item" style="width:100%; border: 1px dashed #4285F4; justify-content: center; margin-top: 10px;" onclick="openAddAccountPrompt()">
+                <span style="color: #4285F4; font-weight: bold;">➕ Başka bir hesap ekle (@gmail.com)</span>
+            </button>
+            <div style="margin-top: 15px; border-top: 1px solid #2d3139; padding-top: 15px; display: flex; justify-content: flex-end;">
+                <button class="close-modal" style="font-size: 14px; color: #4285F4;" onclick="closeGoogleAccountSelector()">İptal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gelişmiş Yönetim Paneli Modal -->
+    <div class="modal-overlay" id="adminModal" onclick="handleOverlayClick(event, 'adminModal')">
+        <div class="modal-box" style="width: 780px;">
+            <div class="modal-header">
+                <h3 style="margin:0; color: #fff; display: flex; align-items: center; gap: 8px;">⚙️ Gelişmiş Yönetim Paneli</h3>
+                <button class="close-modal" onclick="closeAdminPanel()">&times;</button>
+            </div>
+            
+            <!-- Admin Sekmeleri -->
+            <div style="display: flex; gap: 6px; margin-bottom: 20px; border-bottom: 1px solid #2d3139; padding-bottom: 12px; flex-wrap: wrap;">
+                <button class="copy-btn admin-nav-btn" onclick="switchAdminTab('gamesTab')">🎮 Oyunlar</button>
+                <button class="copy-btn admin-nav-btn" style="border-color: #00ec64; background: #00ec64; color: #000;" onclick="switchAdminTab('addScriptTab')">➕ Script Ekle</button>
+                <button class="copy-btn admin-nav-btn" style="border-color: #ffd700; color: #ffd700;" onclick="switchAdminTab('vipTab')">⭐ VIP Script</button>
+                <button class="copy-btn admin-nav-btn" onclick="switchAdminTab('accountsTab')">👤 Hesaplar</button>
+                <button class="copy-btn admin-nav-btn" onclick="switchAdminTab('ideasTab')">💡 Fikirler (<span id="ideaCountBadge">0</span>)</button>
+                <button class="copy-btn admin-nav-btn" onclick="switchAdminTab('mailsTab')">📧 Mailler</button>
+                <button class="copy-btn admin-nav-btn" style="border-color: #ff4d4d; color: #ff4d4d;" onclick="handleLogout()">🚪 Çıkış</button>
+            </div>
+
+            <!-- 1) OYUN YÖNETİMİ SEKME -->
+            <div id="gamesTab" class="admin-tab-content" style="display: none;">
+                <p style="color: #7a828e; font-size: 13px; margin-bottom: 12px;">Menüye yeni oyun kategorisi ekleyebilir ve oyunları silebilirsiniz:</p>
+                
+                <div style="display: flex; gap: 8px; margin-bottom: 15px; background: #12141c; padding: 12px; border-radius: 8px; border: 1px solid #1f2330; flex-wrap: wrap;">
+                    <input type="text" id="newGameKey" placeholder="Anahtar (örn: pubg)..." style="flex:1; min-width: 120px;">
+                    <input type="text" id="newGameTitle" placeholder="Başlık (örn: 🔫 PUBG Mobile)..." style="flex:2; min-width: 150px;">
+                    <button class="submit-btn" style="margin:0; width: auto;" onclick="adminAddGame()">Kategori Ekle</button>
+                </div>
+                
+                <hr style="border: 1px solid #1f2330; margin: 20px 0;">
+                <div id="adminGamesContainer" style="max-height: 250px; overflow-y: auto; padding-right: 5px;"></div>
+            </div>
+
+            <!-- 2) SCRIPT EKLEME SEKME -->
+            <div id="addScriptTab" class="admin-tab-content">
+                <p style="color: #00ec64; font-size: 13px; margin-bottom: 15px; font-weight: bold;">Seçtiğiniz oyuna kopyalanabilir gerçek bir script/hile ekleyin:</p>
+                
+                <div style="background: #12141c; padding: 20px; border-radius: 8px; border: 1px solid #1f2330;">
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <div>
+                            <label style="color: #7a828e; font-size: 12px; display:block; margin-bottom:5px;">Oyun Seçin:</label>
+                            <select id="targetGameSelect" style="background-color: #1a1c23; color: #ffffff; border: 1px solid #2d3139; border-radius: 8px; padding: 12px; width: 100%; outline: none;"></select>
+                        </div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 200px;">
+                                <label style="color: #7a828e; font-size: 12px; display:block; margin-bottom:5px;">Script Başlığı:</label>
+                                <input type="text" id="newScriptTitle" placeholder="Örn: Wallhack & Aimbot...">
+                            </div>
+                            <div style="flex: 2; min-width: 200px;">
+                                <label style="color: #7a828e; font-size: 12px; display:block; margin-bottom:5px;">Script Açıklaması:</label>
+                                <input type="text" id="newScriptDesc" placeholder="Hilenin özellikleri hakkında kısa bilgi...">
+                            </div>
+                        </div>
+                        <div>
+                            <label style="color: #00ec64; font-size: 12px; display:block; margin-bottom:5px;">GERÇEK SCRİPT KODU:</label>
+                            <textarea id="newScriptCode" rows="4" placeholder="loadstring(game:HttpGet('https://raw.github...'))()"></textarea>
+                        </div>
+                        <button class="submit-btn" style="padding: 15px; font-size: 15px;" onclick="adminAddScriptToGame()">🚀 Sisteme Script Ekle</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3) VIP SCRIPT YÖNETİMİ SEKME -->
+            <div id="vipTab" class="admin-tab-content" style="display: none;">
+                <p style="color: #ffd700; font-size: 13px; margin-bottom: 12px;">⭐ Yalnızca VIP üyelerin erişebileceği özel kodlar:</p>
+                
+                <div style="background: #12141c; padding: 15px; border-radius: 8px; border: 1px solid #ffd700; margin-bottom: 15px;">
+                    <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
+                        <input type="text" id="newVipTitle" placeholder="VIP Script Adı..." style="flex: 1; min-width: 150px;">
+                        <input type="text" id="newVipDesc" placeholder="Açıklama..." style="flex: 2; min-width: 150px;">
+                    </div>
+                    <textarea id="newVipCode" rows="2" placeholder="VIP Script Kodunu Buraya Yapıştırın..."></textarea>
+                    <button class="submit-btn" style="background: linear-gradient(135deg, #ffd700, #ff8c00) !important; color: #000 !important; margin-top: 10px;" onclick="adminAddVipScript()">VIP Script Ekle</button>
+                </div>
+
+                <div id="adminVipContainer" style="max-height: 200px; overflow-y: auto; padding-right: 5px;"></div>
+            </div>
+
+            <!-- 4) HESAP YÖNETİMİ SEKME -->
+            <div id="accountsTab" class="admin-tab-content" style="display: none;">
+                <p style="color: #7a828e; font-size: 13px; margin-bottom: 15px;">Kullanıcılara VIP yetkisi tanımlayabilir veya silebilirsiniz:</p>
+                <div id="adminAccountsContainer" style="max-height: 280px; overflow-y: auto; padding-right: 5px;"></div>
+            </div>
+
+            <!-- 5) FİKİRLER SEKME -->
+            <div id="ideasTab" class="admin-tab-content" style="display: none;">
+                <div id="adminIdeasContainer" style="max-height: 280px; overflow-y: auto; padding-right: 5px;"></div>
+            </div>
+
+            <!-- 6) MAİLLER SEKME -->
+            <div id="mailsTab" class="admin-tab-content" style="display: none;">
+                <div id="adminMailsContainer" style="max-height: 280px; overflow-y: auto; padding-right: 5px;"></div>
+            </div>
+
+        </div>
+    </div>
 
     <script>
-      const firebaseConfig = {
-        apiKey: "AIzaSyDpuJm6D9752OUXZ12L__agm3UmOI1I7Dw",
-        authDomain: "klakznew.firebaseapp.com",
-        databaseURL: "https://klakznew-default-rtdb.firebaseio.com",
-        projectId: "klakznew",
-        storageBucket: "klakznew.firebasestorage.app",
-        messagingSenderId: "238260974670",
-        appId: "1:238260974670:web:2e79129396a2b0967aff1f",
-        measurementId: "G-0BSKME20V1"
-      };
+        // Güvenlik için HTML Escape Fonksiyonu
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
 
-      firebase.initializeApp(firebaseConfig);
-      const database = firebase.database();
+        // Pano Kopyalama Fonksiyonu
+        function copyScript(btn) {
+            const rawCode = btn.getAttribute('data-code');
+            if (!rawCode) {
+                alert('Bu scriptin kodu bulunamadı!');
+                return;
+            }
+            
+            const code = decodeURIComponent(rawCode);
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(code).then(() => {
+                    showCopiedFeedback(btn);
+                }).catch(() => {
+                    fallbackCopyText(code, btn);
+                });
+            } else {
+                fallbackCopyText(code, btn);
+            }
+        }
 
-      // Otomatik Script Ekleme İşlevi
-      function addScript() {
-          const title = document.getElementById("title").value;
-          const desc = document.getElementById("desc").value;
-          const code = document.getElementById("code").value;
+        function fallbackCopyText(text, btn) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showCopiedFeedback(btn);
+            } catch (err) {
+                alert('Kopyalama başarısız oldu!');
+            }
+            document.body.removeChild(textArea);
+        }
 
-          if (!title || !code) {
-              alert("Lütfen başlık ve kod alanlarını doldurun!");
-              return;
-          }
+        function showCopiedFeedback(btn) {
+            const originalText = btn.textContent;
+            btn.textContent = "✔️ Kopyalandı";
+            btn.style.backgroundColor = "#00ec64";
+            btn.style.color = "#000";
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.backgroundColor = "#1f2330";
+                btn.style.color = "#00ec64";
+            }, 2000);
+        }
 
-          database.ref("scripts").push({
-              title: title,
-              desc: desc,
-              code: code
-          }).then(() => {
-              alert("Script başarıyla eklendi!");
-              document.getElementById("title").value = "";
-              document.getElementById("desc").value = "";
-              document.getElementById("code").value = "";
-          }).catch((error) => {
-              alert("Hata oluştu: " + error.message);
-          });
-      }
+        // Overlay veya ESC ile Modal Kapatma
+        function handleOverlayClick(e, modalId) {
+            if (e.target.id === modalId) {
+                document.getElementById(modalId).style.display = 'none';
+            }
+        }
 
-      // Kopyalama İşlevi
-      function copyScript(code, button) {
-          navigator.clipboard.writeText(code).then(() => {
-              const originalText = button.innerText;
-              button.innerText = "Kopyalandı! ✓";
-              button.classList.add("copied");
-              setTimeout(() => {
-                  button.innerText = originalText;
-                  button.classList.remove("copied");
-              }, 2000);
-          });
-      }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeLoginModal();
+                closeGoogleAccountSelector();
+                closeAdminPanel();
+            }
+        });
 
-      // Canlı Veri Dinleme ve Listeleme
-      const scriptListDiv = document.getElementById("script-list");
-      
-      database.ref("scripts").on("value", (snapshot) => {
-          scriptListDiv.innerHTML = "";
-          const data = snapshot.val();
+        // Varsayılan Oyun ve Kategori Verileri
+        let categoryData = JSON.parse(localStorage.getItem('klakz_category_data')) || {
+            roblox: {
+                title: "🔴 Roblox Scriptleri",
+                content: `
+                    <div class="script-grid">
+                        <div class="script-card">
+                            <div class="script-title">Blox Fruits Auto Farm</div>
+                            <div class="script-desc">Otomatik level kasma ve meyve toplama scripti.</div>
+                            <button class="copy-btn" onclick="copyScript(this)" data-code="${encodeURIComponent('loadstring(game:HttpGet("https://raw.githubusercontent.com/ornek/script/main.lua"))()')}">Scripti Kopyala</button>
+                        </div>
+                    </div>
+                `
+            },
+            csgo: {
+                title: "🎯 CS:GO / CS2 Scriptleri",
+                content: `
+                    <div class="script-grid">
+                        <div class="script-card">
+                            <div class="script-title">BunnyHop Config</div>
+                            <div class="script-desc">Otomatik zıplama optimizasyon ayarları.</div>
+                            <button class="copy-btn" onclick="copyScript(this)" data-code="${encodeURIComponent('bind mwheelup +jump; bind mwheeldown +jump;')}">Scripti Kopyala</button>
+                        </div>
+                    </div>
+                `
+            }
+        };
 
-          if (!data) {
-              scriptListDiv.innerHTML = `<div class="script-card"><div class="script-title">Henüz Script Yok</div><div class="script-desc">Yukarıdaki formdan ilk scriptini ekleyebilirsin.</div></div>`;
-              return;
-          }
+        let vipScripts = JSON.parse(localStorage.getItem('klakz_vip_scripts')) || [
+            { id: 1, title: 'Quantum Bypass V5', desc: 'En güncel koruma bypassı.', code: 'print("VIP Bypass Activated")' }
+        ];
 
-          Object.keys(data).forEach(key => {
-              const item = data[key];
-              const card = document.createElement("div");
-              card.className = "script-card";
-              card.innerHTML = `
-                  <div class="script-title">${item.title}</div>
-                  <div class="script-desc">${item.desc || 'Açıklama yok.'}</div>
-                  <button class="btn-copy" onclick="copyScript(\`${item.code}\`, this)">Scripti Kopyala</button>
-              `;
-              scriptListDiv.appendChild(card);
-          });
-      });
+        const specialCategories = {
+            ideas: {
+                title: "💡 Fikrini Paylaş",
+                content: `
+                    <div class="card">
+                        <h3>💡 Fikrini Paylaş</h3>
+                        <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+                            <input type="text" id="ideaPlatform" placeholder="Oyun / Platform Adı...">
+                            <textarea id="ideaText" rows="4" placeholder="Fikrini veya isteğini buraya yaz..."></textarea>
+                            <button class="submit-btn" id="submitIdeaBtn">Öneriyi Gönder</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>📋 Paylaşılan Fikirler & İstekler</h3>
+                        <div id="publicIdeasList"></div>
+                    </div>
+                `
+            },
+            contact: {
+                title: "📧 İletişim / Gmail Gönder",
+                content: `
+                    <div class="card" style="max-width: 600px; margin: 0 auto;">
+                        <h3>📧 Doğrudan İletişim Kur</h3>
+                        <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+                            <input type="text" id="senderName" placeholder="Adınız Soyadınız...">
+                            <input type="email" id="senderEmail" placeholder="E-posta Adresiniz (örn:ornek@gmail.com)..." value="hasandogruyol81@gmail.com">
+                            <input type="text" id="mailSubject" placeholder="Konu Başlığı...">
+                            <textarea id="mailMessage" rows="5" placeholder="Mesajınızı buraya yazın..."></textarea>
+                            <button class="submit-btn" id="sendMailBtn">Gmail Olarak Gönder</button>
+                        </div>
+                    </div>
+                `
+            },
+            competition: {
+                title: "🏆 Script Yarışması",
+                content: `
+                    <div class="card">
+                        <h3>🏆 Klakz Hub Script Yarışması</h3>
+                        <p style="color: #a0a6b8;">Kendi yazdığınız scriptleri yarışmaya gönderin, büyük ödülleri kazanın!</p>
+                        <p style="color: #00ec64; font-size: 14px;">Şu an aktif bir yarışma bulunmuyor. Yakında duyurulacak!</p>
+                    </div>
+                `
+            },
+            premium: {
+                title: "⭐ Premium Hub (VIP Özel)",
+                content: `
+                    <div class="card" style="border-color: #ffd700; background: linear-gradient(135deg, #15171e, #1f1a10);">
+                        <h3>⭐ Klakz Hub Premium Özellikler</h3>
+                        <p style="color: #a0a6b8;">Yalnızca VIP üyeler kopyalayabilir:</p>
+                        <div id="publicVipGrid" class="script-grid" style="margin-top: 20px;"></div>
+                    </div>
+                `
+            }
+        };
+
+        let googleAccounts = JSON.parse(localStorage.getItem('klakz_google_accounts')) || [
+            { id: 1, name: 'Hasan Doğruyol', email: 'hasandogruyol81@gmail.com', isVip: true }
+        ];
+
+        let ideasList = JSON.parse(localStorage.getItem('klakz_ideas')) || [];
+        let mailList = JSON.parse(localStorage.getItem('klakz_mails')) || [];
+        let authState = JSON.parse(localStorage.getItem('klakz_auth')) || { isLoggedIn: true, name: 'Hasan Doğruyol', email: 'hasandogruyol81@gmail.com', isAdmin: true, isVip: true };
+        let currentKey = 'roblox';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            updateAuthUI();
+            renderSidebar();
+            const firstKey = Object.keys(categoryData)[0];
+            if(firstKey) switchCategory(firstKey);
+        });
+
+        function saveCategoryData() { localStorage.setItem('klakz_category_data', JSON.stringify(categoryData)); }
+        function saveVipScripts() { localStorage.setItem('klakz_vip_scripts', JSON.stringify(vipScripts)); }
+        function saveAccounts() { localStorage.setItem('klakz_google_accounts', JSON.stringify(googleAccounts)); }
+
+        function renderSidebar() {
+            const container = document.getElementById('sidebarCategories');
+            let html = '';
+            for (let key in categoryData) {
+                const data = categoryData[key];
+                const isActive = (key === currentKey) ? 'active' : '';
+                html += `<button class="menu-item ${isActive}" onclick="switchCategory('${key}', this)">${escapeHtml(data.title)}</button>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function switchCategory(categoryKey, element) {
+            currentKey = categoryKey;
+            document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+            if(element) {
+                element.classList.add('active');
+            } else {
+                const targetBtn = Array.from(document.querySelectorAll('.menu-item')).find(el => el.getAttribute('onclick')?.includes(categoryKey));
+                if(targetBtn) targetBtn.classList.add('active');
+            }
+
+            const data = categoryData[categoryKey] || specialCategories[categoryKey];
+            if(!data) return;
+
+            const container = document.getElementById('dynamic-content');
+            container.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <h2 style="color: #ffffff; margin: 0 0 5px 0; font-size: 22px;">${escapeHtml(data.title)}</h2>
+                </div>
+                ${data.content}
+            `;
+
+            if (categoryKey === 'ideas') {
+                renderPublicIdeas();
+                const ideaBtn = document.getElementById('submitIdeaBtn');
+                if(ideaBtn) ideaBtn.addEventListener('click', submitIdea);
+            }
+            else if (categoryKey === 'contact') {
+                const mailBtn = document.getElementById('sendMailBtn');
+                if(mailBtn) mailBtn.addEventListener('click', sendMail);
+            }
+            else if (categoryKey === 'premium') {
+                renderPublicVipScripts();
+            }
+        }
+
+        // --- VIP ALANI ---
+        function renderPublicVipScripts() {
+            const grid = document.getElementById('publicVipGrid');
+            if (!grid) return;
+
+            if (vipScripts.length === 0) {
+                grid.innerHTML = '<p style="color: #7a828e; font-size: 14px;">Aktif VIP script bulunmuyor.</p>';
+                return;
+            }
+
+            let html = '';
+            vipScripts.forEach(script => {
+                html += `
+                    <div class="script-card" style="border-color: #ffd700;">
+                        <div style="position: absolute; top: 12px; right: 12px;"><span class="vip-badge">VIP</span></div>
+                        <div class="script-title" style="color: #ffd700;">${escapeHtml(script.title)}</div>
+                        <div class="script-desc">${escapeHtml(script.desc)}</div>
+                        <button class="copy-btn" style="border-color: #ffd700; color: #ffd700;" onclick="checkVipAccess(this, '${encodeURIComponent(script.code)}')">💎 VIP Kodu Kopyala</button>
+                    </div>
+                `;
+            });
+            grid.innerHTML = html;
+        }
+
+        function checkVipAccess(btn, encodedCode) {
+            if (!authState.isLoggedIn) {
+                alert('VIP scriptleri almak için giriş yapmalısınız!');
+                openLoginModal();
+                return;
+            }
+            if (!authState.isVip) {
+                alert('Erişim Reddedildi! Sadece ⭐ Premium (VIP) üyeler bu kodu kopyalayabilir.');
+                return;
+            }
+            
+            const code = decodeURIComponent(encodedCode);
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(code).then(() => {
+                    const originalText = btn.textContent;
+                    btn.textContent = "✔️ Kopyalandı";
+                    btn.style.backgroundColor = "#ffd700";
+                    btn.style.color = "#000";
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.style.backgroundColor = "#12141c";
+                        btn.style.color = "#ffd700";
+                    }, 2000);
+                });
+            } else {
+                fallbackCopyText(code, btn);
+            }
+        }
+
+        // --- AUTH & MODALLAR ---
+        function updateAuthUI() {
+            const adminBtn = document.getElementById('adminPanelBtn');
+            const authBtn = document.getElementById('authBtn');
+
+            if (authState.isLoggedIn) {
+                let badgeText = authState.isAdmin ? ' (Admin)' : (authState.isVip ? ' ⭐ VIP' : '');
+                authBtn.innerHTML = `👤 ${escapeHtml(authState.name)}${badgeText}`;
+                adminBtn.style.display = authState.isAdmin ? 'block' : 'none';
+                authBtn.style.background = authState.isVip ? 'linear-gradient(135deg, #ffd700, #ff8c00)' : '#1f2330';
+                authBtn.style.color = authState.isVip ? '#000' : '#00ec64';
+            } else {
+                adminBtn.style.display = 'none';
+                authBtn.innerHTML = '👤 Giriş Yap';
+                authBtn.style.background = 'linear-gradient(135deg, #00ec64, #00b34a)';
+                authBtn.style.color = '#000000';
+            }
+        }
+
+        function openLoginModal() {
+            if (authState.isLoggedIn) {
+                if (confirm(`Çıkış yapmak ister misiniz?`)) handleLogout();
+                return;
+            }
+            document.getElementById('loginModal').style.display = 'flex';
+        }
+        function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
+
+        function openGoogleAccountSelector() {
+            closeLoginModal();
+            renderGoogleAccountsList();
+            document.getElementById('googleAccountModal').style.display = 'flex';
+        }
+        function closeGoogleAccountSelector() { document.getElementById('googleAccountModal').style.display = 'none'; }
+
+        function renderGoogleAccountsList() {
+            const container = document.getElementById('googleAccountsList');
+            let html = '';
+            googleAccounts.forEach(acc => {
+                const initial = acc.name.charAt(0).toUpperCase();
+                const vipBadge = acc.isVip ? '<span class="vip-badge" style="margin-left:5px;">VIP</span>' : '';
+                html += `
+                    <div class="google-account-item" onclick="selectGoogleAccount('${escapeHtml(acc.name)}', '${escapeHtml(acc.email)}', ${acc.isVip})">
+                        <div class="google-avatar">${initial}</div>
+                        <div style="text-align: left; flex: 1;">
+                            <div style="color: #fff; font-weight: bold; font-size: 14px; display:flex; align-items:center;">${escapeHtml(acc.name)} ${vipBadge}</div>
+                            <div style="color: #7a828e; font-size: 12px;">${escapeHtml(acc.email)}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function openAddAccountPrompt() {
+            const email = prompt("Yeni Google (Gmail) e-postanızı girin:");
+            if(!email || !email.includes('@gmail.com')) {
+                alert("Lütfen geçerli bir @gmail.com adresi girin!");
+                return;
+            }
+            const name = email.split('@')[0];
+            const newAcc = { id: Date.now(), name, email, isVip: false };
+            googleAccounts.push(newAcc);
+            saveAccounts();
+            renderGoogleAccountsList();
+        }
+
+        function selectGoogleAccount(name, email, isVip) {
+            const isAdminAcc = (email === 'hasandogruyol81@gmail.com');
+            authState = { isLoggedIn: true, name, email, isAdmin: isAdminAcc, isVip: isVip || isAdminAcc };
+            localStorage.setItem('klakz_auth', JSON.stringify(authState));
+            closeGoogleAccountSelector();
+            updateAuthUI();
+            alert(`Giriş yapıldı: ${email}`);
+            if (isAdminAcc) openAdminPanel();
+        }
+
+        function handleLogin() {
+            const user = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+            if (user === 'admin' && pass === 'admin123') {
+                authState = { isLoggedIn: true, name: 'Admin', email: 'admin', isAdmin: true, isVip: true };
+                localStorage.setItem('klakz_auth', JSON.stringify(authState));
+                closeLoginModal();
+                updateAuthUI();
+                openAdminPanel();
+            } else {
+                alert('Hatalı bilgiler!');
+            }
+        }
+        function handleLogout() {
+            authState = { isLoggedIn: false, name: '', email: '', isAdmin: false, isVip: false };
+            localStorage.removeItem('klakz_auth');
+            closeAdminPanel();
+            updateAuthUI();
+        }
+
+        // --- ADMIN PANELI YÖNETİMİ ---
+        function openAdminPanel() {
+            if (!authState.isAdmin) return;
+            document.getElementById('adminModal').style.display = 'flex';
+            renderAdminGames(); 
+            renderAdminVipScripts();
+            renderAdminAccounts();
+            renderAdminIdeas();
+            renderAdminMails();
+            switchAdminTab('addScriptTab');
+        }
+        function closeAdminPanel() { document.getElementById('adminModal').style.display = 'none'; }
+
+        function switchAdminTab(tabId) {
+            document.querySelectorAll('.admin-tab-content').forEach(el => el.style.display = 'none');
+            document.getElementById(tabId).style.display = 'block';
+            
+            document.querySelectorAll('.admin-nav-btn').forEach(btn => {
+                btn.style.background = 'transparent';
+                btn.style.color = '#00ec64';
+            });
+            
+            const activeBtn = Array.from(document.querySelectorAll('.admin-nav-btn')).find(b => b.getAttribute('onclick')?.includes(tabId));
+            if(activeBtn && tabId === 'addScriptTab') {
+                activeBtn.style.background = '#00ec64';
+                activeBtn.style.color = '#000';
+            }
+        }
+
+        // --- OYUN YÖNETİMİ ---
+        function adminAddGame() {
+            const key = document.getElementById('newGameKey').value.trim().toLowerCase();
+            const title = document.getElementById('newGameTitle').value.trim();
+
+            if (!key || !title) { alert('Alanları doldurun!'); return; }
+            if (categoryData[key] || specialCategories[key]) { alert('Bu oyun anahtarı zaten var!'); return; }
+
+            categoryData[key] = {
+                title: title,
+                content: `<div class="script-grid"><p style="color: #7a828e; font-size: 13px;">Bu oyuna henüz script eklenmedi.</p></div>`
+            };
+
+            saveCategoryData();
+            renderSidebar();
+            renderAdminGames();
+            document.getElementById('newGameKey').value = '';
+            document.getElementById('newGameTitle').value = '';
+            alert('Oyun Eklendi!');
+        }
+
+        function renderAdminGames() {
+            const container = document.getElementById('adminGamesContainer');
+            const select = document.getElementById('targetGameSelect');
+            let selectHtml = '';
+            let listHtml = '';
+
+            for (let key in categoryData) {
+                const game = categoryData[key];
+                selectHtml += `<option value="${key}">${escapeHtml(game.title)}</option>`;
+
+                let scriptsHtml = '';
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = game.content;
+                const cards = tempDiv.querySelectorAll('.script-card');
+                
+                if (cards.length > 0) {
+                    cards.forEach((card, index) => {
+                        const sTitle = card.querySelector('.script-title')?.textContent || 'Script';
+                        scriptsHtml += `
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: #15171e; padding: 6px 10px; border-radius: 6px; margin-top: 6px; border: 1px solid #1f2330;">
+                                <span style="font-size: 12px; color: #a0a6b8;">🔹 ${escapeHtml(sTitle)}</span>
+                                <button class="delete-btn" style="padding: 2px 8px; font-size: 11px;" onclick="adminDeleteScriptFromGame('${key}', ${index})">Sil</button>
+                            </div>
+                        `;
+                    });
+                } else {
+                    scriptsHtml = '<div style="font-size: 12px; color: #7a828e; margin-top: 5px;">Kayıtlı script yok.</div>';
+                }
+
+                listHtml += `
+                    <div class="game-item-admin" style="flex-direction: column; align-items: stretch; gap: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="color: #00ec64; font-size: 14px; font-weight: bold;">${escapeHtml(game.title)}</div>
+                            <button class="delete-btn" onclick="adminDeleteGame('${key}')">Oyunu Sil</button>
+                        </div>
+                        <div style="border-top: 1px solid #1f2330; padding-top: 6px;">
+                            ${scriptsHtml}
+                        </div>
+                    </div>
+                `;
+            }
+            if(select) select.innerHTML = selectHtml;
+            if(container) container.innerHTML = listHtml;
+        }
+
+        function adminDeleteScriptFromGame(key, scriptIndex) {
+            let gameObj = categoryData[key];
+            if (!gameObj) return;
+
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = gameObj.content;
+            const cards = tempDiv.querySelectorAll('.script-card');
+
+            if (cards[scriptIndex]) {
+                cards[scriptIndex].remove();
+                const grid = tempDiv.querySelector('.script-grid');
+                if (grid && grid.children.length === 0) {
+                    gameObj.content = `<div class="script-grid"><p style="color: #7a828e; font-size: 13px;">Bu oyuna henüz script eklenmedi.</p></div>`;
+                } else {
+                    gameObj.content = tempDiv.innerHTML;
+                }
+                saveCategoryData();
+                renderAdminGames();
+                if (currentKey === key) switchCategory(key);
+            }
+        }
+
+        function adminDeleteGame(key) {
+            if (Object.keys(categoryData).length <= 1) { alert('Sistemde en az bir oyun kalmalı!'); return; }
+            if (confirm(`Oyunu silmek istediğinize emin misiniz?`)) {
+                delete categoryData[key];
+                saveCategoryData();
+                renderSidebar();
+                renderAdminGames();
+                if (currentKey === key) {
+                    const remainingKeys = Object.keys(categoryData);
+                    switchCategory(remainingKeys[0]);
+                }
+            }
+        }
+
+        function adminAddScriptToGame() {
+            const gameKey = document.getElementById('targetGameSelect').value;
+            const title = document.getElementById('newScriptTitle').value.trim();
+            const desc = document.getElementById('newScriptDesc').value.trim();
+            const rawCode = document.getElementById('newScriptCode').value.trim();
+
+            if (!gameKey || !title || !desc || !rawCode) {
+                alert('Lütfen Script Kodu dahil tüm alanları doldurun!');
+                return;
+            }
+
+            let gameObj = categoryData[gameKey];
+            if (!gameObj) return;
+
+            if (gameObj.content.includes('Bu oyuna henüz script eklenmedi.') || !gameObj.content.includes('script-grid')) {
+                gameObj.content = `<div class="script-grid"></div>`;
+            }
+
+            const encodedCode = encodeURIComponent(rawCode);
+            const newCardHtml = `
+                <div class="script-card">
+                    <div class="script-title">${escapeHtml(title)}</div>
+                    <div class="script-desc">${escapeHtml(desc)}</div>
+                    <button class="copy-btn" onclick="copyScript(this)" data-code="${encodedCode}">Scripti Kopyala</button>
+                </div>
+            `;
+
+            gameObj.content = gameObj.content.replace('</div>', newCardHtml + '</div>');
+            saveCategoryData();
+            
+            renderAdminGames();
+            if (currentKey === gameKey) switchCategory(gameKey);
+
+            document.getElementById('newScriptTitle').value = '';
+            document.getElementById('newScriptDesc').value = '';
+            document.getElementById('newScriptCode').value = '';
+            alert('🎉 Script sisteme kopyalanabilir şekilde eklendi!');
+        }
+
+        function adminAddVipScript() {
+            const title = document.getElementById('newVipTitle').value.trim();
+            const desc = document.getElementById('newVipDesc').value.trim();
+            const code = document.getElementById('newVipCode').value.trim();
+
+            if (!title || !desc || !code) {
+                alert('Lütfen tüm alanları doldurun!');
+                return;
+            }
+
+            vipScripts.push({ id: Date.now(), title, desc, code });
+            saveVipScripts();
+            renderAdminVipScripts();
+            if (currentKey === 'premium') renderPublicVipScripts();
+
+            document.getElementById('newVipTitle').value = '';
+            document.getElementById('newVipDesc').value = '';
+            document.getElementById('newVipCode').value = '';
+            alert('VIP Script başarıyla eklendi!');
+        }
+
+        function renderAdminVipScripts() {
+            const container = document.getElementById('adminVipContainer');
+            if (vipScripts.length === 0) { container.innerHTML = '<p style="color: #7a828e; font-size: 13px;">VIP script yok.</p>'; return; }
+            let html = '';
+            vipScripts.forEach(script => {
+                html += `
+                    <div class="account-item-admin" style="border-color: rgba(255, 215, 0, 0.3);">
+                        <div>
+                            <div style="color: #ffd700; font-size: 14px; font-weight: bold;">${escapeHtml(script.title)}</div>
+                            <div style="color: #7a828e; font-size: 12px; margin-top: 3px;">${escapeHtml(script.desc)}</div>
+                        </div>
+                        <button class="delete-btn" onclick="adminDeleteVipScript(${script.id})">Sil</button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function adminDeleteVipScript(id) {
+            if (confirm('Emin misiniz?')) {
+                vipScripts = vipScripts.filter(s => s.id !== id);
+                saveVipScripts();
+                renderAdminVipScripts();
+                if (currentKey === 'premium') renderPublicVipScripts();
+            }
+        }
+
+        function renderAdminAccounts() {
+            const container = document.getElementById('adminAccountsContainer');
+            let html = '';
+            googleAccounts.forEach(acc => {
+                const btnText = acc.isVip ? '⭐ VIP İptal' : '⭐ VIP Yap';
+                const btnColor = acc.isVip ? '#ffaa00' : '#00ec64';
+                html += `
+                    <div class="account-item-admin">
+                        <div>
+                            <div style="color: #00ec64; font-size: 14px; font-weight: bold;">${escapeHtml(acc.name)} ${acc.isVip ? '<span class="vip-badge">VIP</span>' : ''}</div>
+                            <div style="color: #7a828e; font-size: 12px;">${escapeHtml(acc.email)}</div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="copy-btn" style="padding: 6px; font-size: 11px; border-color: ${btnColor}; color: ${btnColor};" onclick="toggleVipStatus(${acc.id})">${btnText}</button>
+                            <button class="delete-btn" onclick="deleteGoogleAccount(${acc.id})">Sil</button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function toggleVipStatus(id) {
+            const acc = googleAccounts.find(a => a.id === id);
+            if (acc) { acc.isVip = !acc.isVip; saveAccounts(); renderAdminAccounts(); }
+        }
+        function deleteGoogleAccount(id) {
+            if (googleAccounts.length <= 1) return;
+            googleAccounts = googleAccounts.filter(a => a.id !== id);
+            saveAccounts(); renderAdminAccounts();
+        }
+
+        // --- FİKRİNİ PAYLAŞ FONKSİYONLARI ---
+        function submitIdea() {
+            const pInput = document.getElementById('ideaPlatform');
+            const tInput = document.getElementById('ideaText');
+            
+            const p = pInput ? pInput.value.trim() : '';
+            const t = tInput ? tInput.value.trim() : '';
+            
+            if (!p || !t) {
+                alert('Lütfen platform adını ve fikir/istek alanını doldurun!');
+                return;
+            }
+            
+            ideasList.unshift({ id: Date.now(), platform: p, text: t, date: new Date().toLocaleDateString('tr-TR') });
+            localStorage.setItem('klakz_ideas', JSON.stringify(ideasList));
+            
+            pInput.value = '';
+            tInput.value = '';
+            renderPublicIdeas();
+            alert('🎉 Fikriniz başarıyla gönderildi!');
+        }
+
+        function renderPublicIdeas() {
+            const cont = document.getElementById('publicIdeasList');
+            if(!cont) return;
+            if(ideasList.length === 0) { 
+                cont.innerHTML = '<p style="color: #7a828e; font-size: 13px;">Henüz paylaşılan bir fikir yok.</p>'; 
+                return; 
+            }
+            let h = ''; 
+            ideasList.forEach(i => {
+                h += `
+                    <div style="background:#12141c; padding:15px; border:1px solid #1f2330; border-radius:8px; margin-bottom:10px;">
+                        <div style="color:#00ec64; font-weight:bold; font-size: 14px;">${escapeHtml(i.platform)} <span style="font-size: 11px; color: #7a828e; font-weight: normal; float: right;">${escapeHtml(i.date)}</span></div>
+                        <p style="color:#a0a6b8; margin:8px 0 0 0; font-size: 13px; word-break: break-word;">${escapeHtml(i.text)}</p>
+                    </div>
+                `;
+            });
+            cont.innerHTML = h;
+        }
+
+        function renderAdminIdeas() {
+            const cont = document.getElementById('adminIdeasContainer');
+            const badge = document.getElementById('ideaCountBadge');
+            if(badge) badge.textContent = ideasList.length;
+            if(!cont) return;
+            
+            if(ideasList.length === 0) {
+                cont.innerHTML = '<p style="color: #7a828e; font-size: 13px;">Hiç fikir bulunmuyor.</p>';
+                return;
+            }
+
+            let h = ''; 
+            ideasList.forEach(i => {
+                h += `
+                    <div class="idea-item-admin">
+                        <div>
+                            <div style="color:#00ec64; font-weight:bold;">${escapeHtml(i.platform)}</div>
+                            <div style="color:#a0a6b8; font-size:12px; margin-top: 3px;">${escapeHtml(i.text)}</div>
+                        </div>
+                        <button class="delete-btn" onclick="deleteIdea(${i.id})">Sil</button>
+                    </div>
+                `;
+            });
+            cont.innerHTML = h;
+        }
+
+        function deleteIdea(id) { 
+            ideasList = ideasList.filter(i => i.id !== id); 
+            localStorage.setItem('klakz_ideas', JSON.stringify(ideasList)); 
+            renderAdminIdeas(); 
+            if(currentKey === 'ideas') renderPublicIdeas(); 
+        }
+
+        // --- İLETİŞİM / GMAİL GÖNDER FONKSİYONLARI ---
+        function sendMail() {
+            const nInput = document.getElementById('senderName');
+            const eInput = document.getElementById('senderEmail');
+            const sInput = document.getElementById('mailSubject');
+            const mInput = document.getElementById('mailMessage');
+
+            const n = nInput ? nInput.value.trim() : '';
+            const e = eInput ? eInput.value.trim() : '';
+            const s = sInput ? sInput.value.trim() : '';
+            const m = mInput ? mInput.value.trim() : '';
+
+            if (!n || !e || !s || !m) {
+                alert('Lütfen tüm iletişim alanlarını eksiksiz doldurun!');
+                return;
+            }
+
+            mailList.unshift({ id: Date.now(), name: n, email: e, subject: s, message: m, date: new Date().toLocaleDateString('tr-TR') });
+            localStorage.setItem('klakz_mails', JSON.stringify(mailList));
+
+            nInput.value = '';
+            eInput.value = '';
+            sInput.value = '';
+            mInput.value = '';
+            alert('📧 Mailiniz başarıyla yönetim paneline gönderildi!');
+        }
+        
+        function renderAdminMails() {
+            const cont = document.getElementById('adminMailsContainer');
+            if(!cont) return;
+
+            if(mailList.length === 0) {
+                cont.innerHTML = '<p style="color: #7a828e; font-size: 13px;">Gelen mail bulunmuyor.</p>';
+                return;
+            }
+
+            let h = ''; 
+            mailList.forEach(m => {
+                h += `
+                    <div class="mail-item-admin" style="flex-direction:column; align-items:flex-start; gap: 6px;">
+                        <div style="display: flex; justify-content: space-between; width: 100%;">
+                            <span style="color:#00ec64; font-weight:bold; font-size: 14px;">${escapeHtml(m.subject)}</span>
+                            <span style="color:#7a828e; font-size: 11px;">${escapeHtml(m.date)}</span>
+                        </div>
+                        <div style="color:#a0a6b8; font-size: 12px;">Gönderen: <b>${escapeHtml(m.name)}</b> (${escapeHtml(m.email)})</div>
+                        <div style="background:#15171e; padding:10px; width:100%; box-sizing:border-box; border-radius: 6px; font-size: 13px; word-break: break-word;">${escapeHtml(m.message)}</div>
+                    </div>
+                `;
+            });
+            cont.innerHTML = h;
+        }
     </script>
 </body>
 </html>
