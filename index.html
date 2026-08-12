@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Klakz Hub | Professional v3.4</title>
+    <title>Klakz Hub | Professional v3.5</title>
     
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'><rect width='100%' height='100%' rx='100' fill='%2312141c'/><path d='M160 120 v260 M200 250 L320 130 M200 250 L320 370' stroke='%2300ec64' stroke-width='45' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
 
@@ -64,13 +64,12 @@
 
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); z-index: 1000; justify-content: center; align-items: center; }
         .user-pill { display: flex; align-items: center; gap: 10px; background: var(--bg-input); padding: 6px 15px; border-radius: 20px; border: 1px solid var(--border-color); }
-        .user-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
         
         .theme-toggle-btn { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 12px; }
         
-        /* Özel Nickname Giriş Alanı Tasarımı */
+        /* Özel E-posta Giriş Alanı Tasarımı */
         .custom-login-box { display: flex; align-items: center; gap: 10px; }
-        .custom-login-box input { margin: 0; padding: 8px 12px !important; width: 140px; font-size: 13px; }
+        .custom-login-box input { margin: 0; padding: 8px 12px !important; width: 200px; font-size: 13px; }
         .custom-login-btn { background: var(--accent); color: #000; border: none; font-weight: bold; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; }
         .custom-login-btn:hover { background: var(--accent-hover); }
 
@@ -86,7 +85,7 @@
 
     <!-- Bildirim Şeridi -->
     <div id="announcementBar" class="announcement-bar">
-        <span>🎉 Klakz Hub v3.4 yayında! Özel Nickname Giriş Sistemi aktif edildi.</span>
+        <span>🎉 Klakz Hub v3.5 yayında! E-posta ile sorunsuz giriş sistemi aktif edildi.</span>
         <button onclick="closeAnnouncement()">Kapat</button>
     </div>
 
@@ -114,11 +113,11 @@
             <div class="topbar">
                 <input type="text" id="searchInput" placeholder="Script ara..." oninput="filterScripts()" style="width: 250px; margin:0;">
                 
-                <!-- Tamamen Yerli ve Sorunsuz Özel Nickname Giriş Sistemi -->
+                <!-- Güvenli E-posta Giriş Alanı -->
                 <div id="authArea">
                     <div class="custom-login-box" id="loginFormContainer">
-                        <input type="text" id="nicknameInput" placeholder="Kullanıcı Adın...">
-                        <button class="custom-login-btn" onclick="handleCustomLogin()">Giriş Yap</button>
+                        <input type="email" id="emailInput" placeholder="E-posta adresin (@gmail.com)...">
+                        <button class="custom-login-btn" onclick="handleEmailLogin()">Giriş Yap</button>
                     </div>
                 </div>
             </div>
@@ -151,11 +150,10 @@
     </div>
 
     <script>
-        let authState = JSON.parse(localStorage.getItem('klakz_auth')) || { isLoggedIn: false, name: '' };
+        let authState = JSON.parse(localStorage.getItem('klakz_auth')) || { isLoggedIn: false, email: '' };
         let favorites = JSON.parse(localStorage.getItem('klakz_favorites')) || [];
         let ideasList = JSON.parse(localStorage.getItem('klakz_ideas')) || [];
         
-        // Tema Ayarı Yükleme
         let currentTheme = localStorage.getItem('klakz_theme') || 'dark';
         document.documentElement.setAttribute('data-theme', currentTheme);
 
@@ -190,7 +188,7 @@
             },
             changelog: {
                 title: "🚀 Sürüm Notları",
-                content: `<div class="card"><h3>v3.4 Güncellemesi</h3><p style="color:var(--text-muted)">• Hata veren harici Google giriş sistemi tamamen kaldırıldı.<br>• Yerine şimşek hızında çalışan özel Nickname (Kullanıcı Adı) giriş sistemi eklendi.<br>• Akıllı Giriş uyarı yönetimi ve Tema hafızası aktif edildi.</p></div>`
+                content: `<div class="card"><h3>v3.5 Güncellemesi</h3><p style="color:var(--text-muted)">• Google hata veren harici popup sistemi yerine doğrudan **E-posta ile giriş** sistemi getirildi.<br>• Hata kodu alma derdi olmadan e-posta adresinle anında sisteme bağlanabilirsin.</p></div>`
             },
             ideas: {
                 title: "💡 Fikrini Paylaş",
@@ -240,17 +238,17 @@
             localStorage.setItem('klakz_announcement_closed', 'true');
         }
 
-        // --- ÖZEL NICKNAME GİRİŞ SİSTEMİ ---
-        function handleCustomLogin() {
-            const nickname = document.getElementById('nicknameInput').value.trim();
-            if(!nickname) {
-                alert('Lütfen geçerli bir kullanıcı adı yazın!');
+        // --- E-POSTA İLE GİRİŞ SİSTEMİ ---
+        function handleEmailLogin() {
+            const emailInput = document.getElementById('emailInput').value.trim();
+            if(!emailInput || !emailInput.includes('@')) {
+                alert('Lütfen geçerli bir e-posta adresi girin!');
                 return;
             }
             
             authState = {
                 isLoggedIn: true,
-                name: nickname
+                email: emailInput
             };
             
             localStorage.setItem('klakz_auth', JSON.stringify(authState));
@@ -258,7 +256,7 @@
         }
 
         function handleLogout() {
-            authState = { isLoggedIn: false, name: '' };
+            authState = { isLoggedIn: false, email: '' };
             localStorage.removeItem('klakz_auth');
             location.reload();
         }
@@ -268,16 +266,16 @@
             if(authState.isLoggedIn) {
                 authArea.innerHTML = `
                     <div class="user-pill">
-                        <span>👤</span>
-                        <span style="font-size:13px; font-weight:600;">${authState.name}</span>
+                        <span>📧</span>
+                        <span style="font-size:13px; font-weight:600;">${authState.email}</span>
                         <button onclick="handleLogout()" style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:11px; padding:0; margin-left:5px;" title="Çıkış Yap">Çıkış</button>
                     </div>
                 `;
             } else {
                 authArea.innerHTML = `
                     <div class="custom-login-box" id="loginFormContainer">
-                        <input type="text" id="nicknameInput" placeholder="Kullanıcı Adın...">
-                        <button class="custom-login-btn" onclick="handleCustomLogin()">Giriş Yap</button>
+                        <input type="email" id="emailInput" placeholder="E-posta adresin (@gmail.com)...">
+                        <button class="custom-login-btn" onclick="handleEmailLogin()">Giriş Yap</button>
                     </div>
                 `;
             }
@@ -313,7 +311,7 @@
                 const authArea = document.getElementById('authArea');
                 authArea.classList.add('auth-pulse');
                 setTimeout(() => authArea.classList.remove('auth-pulse'), 3000);
-                alert('Yönetim paneline erişmek için önce sağ üstten bir kullanıcı adı ile giriş yapmalısın!'); 
+                alert('Yönetim paneline erişmek için önce sağ üstten e-postanla giriş yapmalısın!'); 
                 return; 
             }
             document.getElementById('adminModal').style.display = 'flex';
