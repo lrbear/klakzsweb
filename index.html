@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Klakz Hub | Professional v3.7 - Cloud Firebase</title>
+    <title>Klakz Hub | Professional v3.8 - Google Auth</title>
     
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'><rect width='100%' height='100%' rx='100' fill='%2312141c'/><path d='M160 120 v260 M200 250 L320 130 M200 250 L320 370' stroke='%2300ec64' stroke-width='45' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
 
     <!-- Firebase SDK (v9 Modüler) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDpuJm6D9752OUXZ12L__agm3UmOI1I7Dw",
@@ -26,18 +25,18 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
 
         window.FB_Auth = auth;
-        window.FB_Db = db;
-        window.FB_Methods = { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, collection, addDoc, getDocs, doc, setDoc, getDoc };
+        window.FB_Provider = provider;
+        window.FB_Methods = { signInWithPopup, signOut, onAuthStateChanged };
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                window.currentUserState = { isLoggedIn: true, email: user.email, uid: user.uid };
-                updateAuthUI(true, user.email);
+                window.currentUserState = { isLoggedIn: true, email: user.email, name: user.displayName, photo: user.photoURL };
+                updateAuthUI(true, user.displayName || user.email);
             } else {
-                window.currentUserState = { isLoggedIn: false, email: null, uid: null };
+                window.currentUserState = { isLoggedIn: false, email: null, name: null };
                 updateAuthUI(false, null);
             }
         });
@@ -81,6 +80,9 @@
         
         .submit-btn { background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: #000; font-weight: bold; border: none; border-radius: 8px; padding: 12px 20px; cursor: pointer; width: 100%; }
         
+        .google-login-btn { background-color: #ffffff; color: #111111; font-weight: 600; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 20px; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; font-size: 14px; }
+        .google-login-btn:hover { background-color: #f1f3f4; }
+
         .script-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; margin-top: 15px; }
         .script-card { background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 10px; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
         .script-title { font-weight: bold; color: var(--text-main); font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
@@ -102,17 +104,11 @@
         
         .theme-toggle-btn { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 12px; }
         
-        .auth-buttons-group { display: flex; gap: 10px; align-items: center; }
-        .nav-auth-btn { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
-        .nav-auth-btn:hover { border-color: var(--accent); color: var(--accent); }
-        .nav-register-btn { background: var(--accent); color: #000; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
-        .nav-register-btn:hover { background: var(--accent-hover); }
+        .nav-auth-btn { background: var(--accent); color: #000; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 13px; border: none; transition: 0.2s; }
+        .nav-auth-btn:hover { background: var(--accent-hover); }
 
-        .auth-modal-content { width: 400px; max-width: 90%; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 30px; box-sizing: border-box; position: relative; }
-        .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); }
-        .auth-tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; color: var(--text-muted); font-weight: 600; border-bottom: 2px solid transparent; }
-        .auth-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
+        .auth-modal-content { width: 380px; max-width: 90%; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 30px; box-sizing: border-box; position: relative; text-align: center; }
+        
         .auth-pulse { animation: pulseGlow 1.5s infinite; border: 2px solid var(--accent) !important; }
         @keyframes pulseGlow {
             0% { box-shadow: 0 0 0 0 rgba(0, 236, 100, 0.4); }
@@ -124,7 +120,7 @@
 <body>
 
     <div id="announcementBar" class="announcement-bar">
-        <span>🎉 Klakz Hub v3.7 Bulut Tabanlı Firebase Auth aktif edildi!</span>
+        <span>🎉 Klakz Hub v3.8 - Google ile Güvenli Giriş Aktif!</span>
         <button onclick="closeAnnouncement()">Kapat</button>
     </div>
 
@@ -143,7 +139,7 @@
             <button class="menu-item" onclick="switchCategory('changelog', this)">🚀 Sürüm Notları</button>
             <button class="menu-item" onclick="switchCategory('ideas', this)">💡 Fikrini Paylaş</button>
             <button class="menu-item" onclick="switchCategory('contact', this)">📬 İletişim & Destek</button>
-            <button class="menu-item" onclick="openAdminPanel()" style="color: var(--accent); font-weight: bold; margin-top: 15px;">⚙️ Yönetim Paneli</button>
+            <button class="menu-item" onclick="openAuthModal()" style="color: var(--accent); font-weight: bold; margin-top: 15px;">⚙️ Yönetim Paneli</button>
         </div>
 
         <div class="main-content">
@@ -151,10 +147,7 @@
                 <input type="text" id="searchInput" placeholder="Script ara..." oninput="filterScripts()" style="width: 250px; margin:0;">
                 
                 <div id="authArea">
-                    <div class="auth-buttons-group">
-                        <button class="nav-auth-btn" onclick="openAuthModal('login')">Giriş Yap</button>
-                        <button class="nav-register-btn" onclick="openAuthModal('register')">Kaydol</button>
-                    </div>
+                    <button class="nav-auth-btn" onclick="openAuthModal()">Giriş Yap / Kaydol</button>
                 </div>
             </div>
 
@@ -168,29 +161,22 @@
         </div>
     </div>
 
+    <!-- Google Giriş Modalı -->
     <div class="modal-overlay" id="authModal" onclick="handleOverlayClick(event, 'authModal')">
         <div class="auth-modal-content">
-            <div class="auth-tabs">
-                <div class="auth-tab active" id="tabLoginBtn" onclick="switchAuthTab('login')">Giriş Yap</div>
-                <div class="auth-tab" id="tabRegisterBtn" onclick="switchAuthTab('register')">Kaydol</div>
-            </div>
+            <h3 style="margin-top:0; color:var(--text-main);">Klakz Hub'a Hoş Geldin</h3>
+            <p style="color:var(--text-muted); font-size:13px; margin-bottom:25px;">Yönetim paneline erişmek ve favorilerini kaydetmek için Google hesabınla devam et.</p>
+            
+            <button class="google-login-btn" onclick="loginWithGoogle()">
+                <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+                Google ile Devam Et
+            </button>
 
-            <div id="loginFormSection">
-                <input type="email" id="loginEmail" placeholder="E-posta adresi">
-                <input type="password" id="loginPass" placeholder="Şifre">
-                <button class="submit-btn" onclick="executeLogin()">Giriş Yap</button>
-            </div>
-
-            <div id="registerFormSection" style="display: none;">
-                <input type="email" id="regEmail" placeholder="E-posta adresi">
-                <input type="password" id="regPass" placeholder="Şifre oluştur (Min 6 karakter)">
-                <button class="submit-btn" onclick="executeRegister()">Hesap Oluştur</button>
-            </div>
-
-            <button style="background:none; border:none; color:var(--text-muted); width:100%; margin-top:15px; cursor:pointer;" onclick="closeAuthModal()">İptal / Kapat</button>
+            <button style="background:none; border:none; color:var(--text-muted); width:100%; margin-top:20px; cursor:pointer; font-size:13px;" onclick="closeAuthModal()">İptal</button>
         </div>
     </div>
 
+    <!-- Admin Paneli Modalı -->
     <div class="modal-overlay" id="adminModal" onclick="handleOverlayClick(event, 'adminModal')">
         <div class="card" style="width: 500px; margin: auto; position: relative;">
             <h3 style="margin-top:0;">⚙️ Script Ekleme Paneli</h3>
@@ -208,7 +194,7 @@
     </div>
 
     <script>
-        window.currentUserState = { isLoggedIn: false, email: null, uid: null };
+        window.currentUserState = { isLoggedIn: false, email: null, name: null };
         let favorites = JSON.parse(localStorage.getItem('klakz_favorites')) || [];
         let ideasList = JSON.parse(localStorage.getItem('klakz_ideas')) || [];
         
@@ -246,7 +232,7 @@
             },
             changelog: {
                 title: "🚀 Sürüm Notları",
-                content: `<div class="card"><h3>v3.7 Güncellemesi</h3><p style="color:var(--text-muted)">• Kullanıcı kimlik doğrulamaları doğrudan **Firebase Cloud Auth** altyapısına bağlandı.<br>• Artık tüm hesap verilerin bulutta güvenle saklanmaktadır.</p></div>`
+                content: `<div class="card"><h3>v3.8 Güncellemesi</h3><p style="color:var(--text-muted)">• Karmaşık şifre formları kaldırıldı ve **Google ile Güvenli Giriş** sistemi entegre edildi.</p></div>`
             },
             ideas: {
                 title: "💡 Fikrini Paylaş",
@@ -264,10 +250,9 @@
                 content: `
                     <div class="card">
                         <h3>Bize Ulaşın</h3>
-                        <p style="color:var(--text-muted)">Bir hata bildirmek, öneri sunmak veya destek almak için:</p>
+                        <p style="color:var(--text-muted)">Destek için Discord kanalımızı kullanabilirsiniz:</p>
                         <ul style="color:var(--text-main); line-height: 2; padding-left: 20px;">
                             <li>💬 <b>Discord:</b> <a href="https://discord.gg/zT3W2BNMq" target="_blank" style="color:var(--accent); text-decoration:none;">discord.gg/zT3W2BNMq</a></li>
-                            <li>📧 <b>E-posta:</b> destek@klakzhub.com</li>
                         </ul>
                     </div>
                 `
@@ -294,57 +279,26 @@
             localStorage.setItem('klakz_announcement_closed', 'true');
         }
 
-        function openAuthModal(mode) {
-            document.getElementById('authModal').style.display = 'flex';
-            switchAuthTab(mode);
+        function openAuthModal() {
+            if(window.currentUserState.isLoggedIn) {
+                document.getElementById('adminModal').style.display = 'flex';
+                let h = '';
+                for(let k in categoryData) h += `<option value="${k}">${categoryData[k].title}</option>`;
+                document.getElementById('targetGameSelect').innerHTML = h;
+            } else {
+                document.getElementById('authModal').style.display = 'flex';
+            }
         }
 
         function closeAuthModal() {
             document.getElementById('authModal').style.display = 'none';
         }
 
-        function switchAuthTab(mode) {
-            const loginSec = document.getElementById('loginFormSection');
-            const regSec = document.getElementById('registerFormSection');
-            const tabLogin = document.getElementById('tabLoginBtn');
-            const tabReg = document.getElementById('tabRegisterBtn');
-
-            if(mode === 'login') {
-                loginSec.style.display = 'block';
-                regSec.style.display = 'none';
-                tabLogin.classList.add('active');
-                tabReg.classList.remove('active');
-            } else {
-                loginSec.style.display = 'none';
-                regSec.style.display = 'block';
-                tabReg.classList.add('active');
-                tabLogin.classList.remove('active');
-            }
-        }
-
-        async function executeRegister() {
-            const email = document.getElementById('regEmail').value.trim();
-            const pass = document.getElementById('regPass').value.trim();
-            if(!email || !pass) return alert('Alanları doldurun!');
-
+        async function loginWithGoogle() {
             try {
-                await window.FB_Methods.createUserWithEmailAndPassword(window.FB_Auth, email, pass);
+                await window.FB_Methods.signInWithPopup(window.FB_Auth, window.FB_Provider);
                 closeAuthModal();
-                alert('Bulut hesabı başarıyla oluşturuldu!');
-            } catch (error) {
-                alert('Kayıt hatası: ' + error.message);
-            }
-        }
-
-        async function executeLogin() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const pass = document.getElementById('loginPass').value.trim();
-            if(!email || !pass) return alert('Alanları doldurun!');
-
-            try {
-                await window.FB_Methods.signInWithEmailAndPassword(window.FB_Auth, email, pass);
-                closeAuthModal();
-                alert('Bulut hesabına giriş yapıldı!');
+                alert('Google ile başarılı şekilde giriş yapıldı!');
             } catch (error) {
                 alert('Giriş hatası: ' + error.message);
             }
@@ -359,22 +313,19 @@
             }
         }
 
-        window.updateAuthUI = function(isLoggedIn, email) {
+        window.updateAuthUI = function(isLoggedIn, labelText) {
             const authArea = document.getElementById('authArea');
             if(isLoggedIn) {
                 authArea.innerHTML = `
                     <div class="user-pill">
-                        <span>☁️</span>
-                        <span style="font-size:13px; font-weight:600;">${email}</span>
+                        <span>🛡️</span>
+                        <span style="font-size:13px; font-weight:600;">${labelText}</span>
                         <button onclick="handleLogout()" style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:11px; padding:0; margin-left:5px;" title="Çıkış Yap">Çıkış</button>
                     </div>
                 `;
             } else {
                 authArea.innerHTML = `
-                    <div class="auth-buttons-group">
-                        <button class="nav-auth-btn" onclick="openAuthModal('login')">Giriş Yap</button>
-                        <button class="nav-register-btn" onclick="openAuthModal('register')">Kaydol</button>
-                    </div>
+                    <button class="nav-auth-btn" onclick="openAuthModal()">Giriş Yap / Kaydol</button>
                 `;
             }
         }
@@ -409,8 +360,8 @@
                 const authArea = document.getElementById('authArea');
                 authArea.classList.add('auth-pulse');
                 setTimeout(() => authArea.classList.remove('auth-pulse'), 3000);
-                alert('Yönetim paneli için bulut hesabınızla giriş yapmalısınız!'); 
-                openAuthModal('login');
+                alert('Yönetim paneli için önce Google ile giriş yapmalısın!'); 
+                openAuthModal();
                 return; 
             }
             document.getElementById('adminModal').style.display = 'flex';
@@ -454,14 +405,14 @@
             let h = '';
             favorites.forEach(f => {
                 h += `
-                    <div class="script-card">
+                    <script-card class="script-card">
                         <div class="script-title">${f.title}</div>
                         <div class="script-desc">${f.desc}</div>
                         <div class="card-actions">
                             <button class="copy-btn" onclick="copyScript(this)" data-code="${encodeURIComponent(f.code)}">Kopyala</button>
                             <button class="fav-btn favorited" onclick="toggleFavorite(this, '${f.title}', '${f.desc}', '${encodeURIComponent(f.code)}')">❤️</button>
                         </div>
-                    </div>
+                    </script-card>
                 `;
             });
             grid.innerHTML = h;
