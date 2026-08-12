@@ -32,10 +32,19 @@
             font-size: 20px;
             font-weight: bold;
             color: #00ec64;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+        }
+
+        /* Site Logosu (Sol Menü) */
+        .site-logo-img {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            object-fit: cover;
+            box-shadow: 0 0 10px rgba(0, 236, 100, 0.4);
         }
 
         .menu-category {
@@ -135,6 +144,51 @@
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+
+        /* Kapak Fotoğrafı (Hero Banner) Stili */
+        .hero-banner {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(180deg, rgba(11, 12, 16, 0.2) 0%, rgba(11, 12, 16, 1) 100%), 
+                        url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1200&auto=format&fit=crop') center/cover no-repeat;
+            border-bottom: 1px solid #1f2330;
+            display: flex;
+            align-items: flex-end;
+            padding: 30px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .hero-title-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .hero-logo {
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            border: 2px solid #00ec64;
+            box-shadow: 0 0 20px rgba(0, 236, 100, 0.5);
+            object-fit: cover;
+            background-color: #12141c;
+        }
+
+        .hero-text h1 {
+            margin: 0;
+            font-size: 28px;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+        }
+
+        .hero-text p {
+            margin: 5px 0 0 0;
+            color: #00ec64;
+            font-size: 14px;
+            font-weight: bold;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
         }
 
         /* İçerik Gövdesi */
@@ -438,6 +492,9 @@
             .search-box input {
                 width: 150px;
             }
+            .hero-banner {
+                height: 160px;
+            }
         }
     </style>
 </head>
@@ -445,7 +502,10 @@
 
     <!-- Sol Menü -->
     <div class="sidebar">
-        <div class="logo-area">⚡ KLAKZ HUB</div>
+        <div class="logo-area">
+            <img src="https://via.placeholder.com/100/00ec64/000000?text=K" alt="Klakz Hub Logo" class="site-logo-img">
+            KLAKZ HUB
+        </div>
         
         <div class="menu-category">Oyun Kategorileri</div>
         <div id="sidebarCategories"></div>
@@ -467,6 +527,17 @@
             <div class="topbar-actions">
                 <button class="admin-btn" id="adminPanelBtn" onclick="openAdminPanel()">⚙️ Yönetim Paneli</button>
                 <button class="login-btn" id="authBtn" onclick="openLoginModal()">👤 Giriş Yap</button>
+            </div>
+        </div>
+
+        <!-- Kapak Fotoğrafı (Banner) -->
+        <div class="hero-banner">
+            <div class="hero-title-box">
+                <img src="https://via.placeholder.com/150/00ec64/000000?text=KLAKZ" alt="Klakz Hub Icon" class="hero-logo">
+                <div class="hero-text">
+                    <h1>KLAKZ HUB</h1>
+                    <p>⚡ Güncel & En Güvenli Script Platformu</p>
+                </div>
             </div>
         </div>
 
@@ -613,7 +684,6 @@
     </div>
 
     <script>
-        // Güvenlik için HTML Escape Fonksiyonu
         function escapeHtml(text) {
             if (!text) return '';
             return text
@@ -625,7 +695,6 @@
                 .replace(/'/g, "&#039;");
         }
 
-        // Pano Kopyalama Fonksiyonu
         function copyScript(btn) {
             const rawCode = btn.getAttribute('data-code');
             if (!rawCode) {
@@ -673,7 +742,6 @@
             }, 2000);
         }
 
-        // Overlay veya ESC ile Modal Kapatma
         function handleOverlayClick(e, modalId) {
             if (e.target.id === modalId) {
                 document.getElementById(modalId).style.display = 'none';
@@ -688,7 +756,6 @@
             }
         });
 
-        // Varsayılan Oyun ve Kategori Verileri
         let categoryData = JSON.parse(localStorage.getItem('klakz_category_data')) || {
             roblox: {
                 title: "🔴 Roblox Scriptleri",
@@ -834,7 +901,6 @@
             }
         }
 
-        // --- VIP ALANI ---
         function renderPublicVipScripts() {
             const grid = document.getElementById('publicVipGrid');
             if (!grid) return;
@@ -887,7 +953,6 @@
             }
         }
 
-        // --- AUTH & MODALLAR ---
         function updateAuthUI() {
             const adminBtn = document.getElementById('adminPanelBtn');
             const authBtn = document.getElementById('authBtn');
@@ -984,7 +1049,6 @@
             updateAuthUI();
         }
 
-        // --- ADMIN PANELI YÖNETİMİ ---
         function openAdminPanel() {
             if (!authState.isAdmin) return;
             document.getElementById('adminModal').style.display = 'flex';
@@ -1012,7 +1076,6 @@
             }
         }
 
-        // --- OYUN YÖNETİMİ ---
         function adminAddGame() {
             const key = document.getElementById('newGameKey').value.trim().toLowerCase();
             const title = document.getElementById('newGameTitle').value.trim();
@@ -1233,7 +1296,6 @@
             saveAccounts(); renderAdminAccounts();
         }
 
-        // --- FİKRİNİ PAYLAŞ FONKSİYONLARI ---
         function submitIdea() {
             const pInput = document.getElementById('ideaPlatform');
             const tInput = document.getElementById('ideaText');
