@@ -13,26 +13,25 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-        // BURAYA KENDİ FIREBASE YAPILANDIRMANI YAPIŞTIRABİLİRSİN
         const firebaseConfig = {
-            apiKey: "SENIN_API_KEY",
-            authDomain: "SENIN_PROJECT_ID.firebaseapp.com",
-            projectId: "SENIN_PROJECT_ID",
-            storageBucket: "SENIN_PROJECT_ID.appspot.com",
-            messagingSenderId: "SENIN_SENDER_ID",
-            appId: "SENIN_APP_ID"
+            apiKey: "AIzaSyDpuJm6D9752OUXZ12L__agm3UmOI1I7Dw",
+            authDomain: "klakznew.firebaseapp.com",
+            databaseURL: "https://klakznew-default-rtdb.firebaseio.com",
+            projectId: "klakznew",
+            storageBucket: "klakznew.firebasestorage.app",
+            messagingSenderId: "238260974670",
+            appId: "1:238260974670:web:2e79129396a2b0967aff1f",
+            measurementId: "G-0BSKME20V1"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Global scope'a aktaralım ki arayüz fonksiyonları erişebilsin
         window.FB_Auth = auth;
         window.FB_Db = db;
         window.FB_Methods = { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, collection, addDoc, getDocs, doc, setDoc, getDoc };
 
-        // Sayfa açıldığında oturum kontrolü
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 window.currentUserState = { isLoggedIn: true, email: user.email, uid: user.uid };
