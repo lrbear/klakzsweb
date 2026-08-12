@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klakz Web</title>
+</head>
+<body>
+    <h1>Klakz Web Hazır!</h1>
+
+    <!-- Firebase SDK (Compat Sürümleri) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <script>
+      // Firebase Yapılandırması
+      const firebaseConfig = {
+        apiKey: "AIzaSyDpuJm6D9752OUXZ12L__agm3UmOI1I7Dw",
+        authDomain: "klakznew.firebaseapp.com",
+        projectId: "klakznew",
+        storageBucket: "klakznew.firebasestorage.app",
+        messagingSenderId: "238260974670",
+        appId: "1:238260974670:web:2e79129396a2b0967aff1f",
+        measurementId: "G-0BSKME20V1"
+      };
+
+      // Firebase'i Başlat
+      firebase.initializeApp(firebaseConfig);
+      console.log("Firebase başarıyla bağlandı!");
+    </script>
+</body>
+</html>
