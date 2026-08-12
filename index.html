@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Klakz Hub | Professional v3.9 - Admin & Premium System</title>
+    <title>Klakz Hub | Professional v4.0 - Advanced Admin & Games</title>
     
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'><rect width='100%' height='100%' rx='100' fill='%2312141c'/><path d='M160 120 v260 M200 250 L320 130 M200 250 L320 370' stroke='%2300ec64' stroke-width='45' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
 
@@ -34,14 +34,13 @@
         window.FB_Provider = provider;
         window.FB_Methods = { signInWithPopup, signOut, onAuthStateChanged, doc, setDoc, getDoc, collection, getDocs };
 
-        // Admin e-postanızı buraya yazabilirsiniz (kendi Google hesabınız)
-        const ADMIN_EMAIL = "h14304354@gmail.com"; 
+        // Kendi Google e-posta adresini buraya yazmalısın
+        const ADMIN_EMAIL = "lrbear@gmail.com"; 
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const isAdmin = (user.email === ADMIN_EMAIL);
                 
-                // Firestore'dan kullanıcının güncel premium süresini çekelim
                 let premiumExpiry = 0;
                 try {
                     const userDocRef = doc(db, "users", user.uid);
@@ -49,7 +48,6 @@
                     if (docSnap.exists()) {
                         premiumExpiry = docSnap.data().premiumExpiry || 0;
                     } else {
-                        // İlk kez giriş yapıyorsa Firestore'a kayıt oluşturalım
                         await setDoc(userDocRef, { email: user.email, premiumExpiry: 0 }, { merge: true });
                     }
                 } catch(e) { console.log(e); }
@@ -140,19 +138,12 @@
         .nav-auth-btn:hover { background: var(--accent-hover); }
 
         .auth-modal-content { width: 380px; max-width: 90%; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 30px; box-sizing: border-box; position: relative; text-align: center; }
-        
-        .auth-pulse { animation: pulseGlow 1.5s infinite; border: 2px solid var(--accent) !important; }
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 0 0 0 rgba(0, 236, 100, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(0, 236, 100, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 236, 100, 0); }
-        }
     </style>
 </head>
 <body>
 
     <div id="announcementBar" class="announcement-bar">
-        <span>🎉 Klakz Hub v3.9 - Admin & Premium Sistemi Yayında!</span>
+        <span>🎉 Klakz Hub v4.0 - Genişletilmiş Oyun Kategorileri ve Admin Kontrolü!</span>
         <button onclick="closeAnnouncement()">Kapat</button>
     </div>
 
@@ -173,7 +164,6 @@
             <button class="menu-item" onclick="switchCategory('ideas', this)">💡 Fikrini Paylaş</button>
             <button class="menu-item" onclick="switchCategory('contact', this)">📬 İletişim & Destek</button>
             
-            <!-- Yönetim Paneli Butonu (Sadece Adminlere Açılır/Görünür) -->
             <div id="adminMenuContainer"></div>
         </div>
 
@@ -229,14 +219,17 @@
                 <button class="premium-submit-btn" onclick="adminGivePremium()">Premium Tanımla</button>
             </div>
 
-            <h4 style="margin: 0 0 10px 0;">📦 Yeni Script Yayınla</h4>
+            <h4 style="margin: 0 0 10px 0;">📦 Yeni Script Yayınla & Durum Kontrolü</h4>
             <select id="targetGameSelect"></select>
             <input type="text" id="newScriptTitle" placeholder="Script Başlığı">
             <input type="text" id="newScriptDesc" placeholder="Kısa Açıklama">
+            
+            <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px;">Script Durumu (Çalışıyor mu?)</label>
             <select id="newScriptStatus">
-                <option value="working">🟢 Çalışıyor</option>
+                <option value="working">🟢 Çalışıyor (Aktif)</option>
                 <option value="patched">🔴 Patched (Çalışmıyor)</option>
             </select>
+
             <textarea id="newScriptCode" rows="3" placeholder="loadstring(...)()"></textarea>
             <button class="submit-btn" onclick="adminAddScript()">Scripti Yayınla</button>
             
@@ -268,8 +261,20 @@
                     </div>
                 `
             },
-            valorant: {
-                title: "⚡ Valorant / Diğer",
+            csgo: {
+                title: "🎯 CS 1.6 / Source",
+                content: `<div class="script-grid"></div>`
+            },
+            minecraft: {
+                title: "🧱 Minecraft",
+                content: `<div class="script-grid"></div>`
+            },
+            gta: {
+                title: "🚗 GTA V / FiveM",
+                content: `<div class="script-grid"></div>`
+            },
+            brawl: {
+                title: "⭐ Brawl Stars",
                 content: `<div class="script-grid"></div>`
             }
         };
@@ -287,7 +292,7 @@
             },
             changelog: {
                 title: "🚀 Sürüm Notları",
-                content: `<div class="card"><h3>v3.9 Güncellemesi</h3><p style="color:var(--text-muted)">• Bulut tabanlı **Admin ve Süreli Premium** (5, 10, 15, 20, 30 gün) sistemi eklendi.<br>• Yetkilendirmeler Firestore altyapısı ile güvenceye alındı.</p></div>`
+                content: `<div class="card"><h3>v4.0 Güncellemesi</h3><p style="color:var(--text-muted)">• Oyun kategorileri güncellendi (CS 1.6/Source, Minecraft, GTA V/FiveM, Brawl Stars, Roblox).<br>• Admin paneline script durum denetimi (Çalışıyor/Patched) eklendi.</p></div>`
             },
             ideas: {
                 title: "💡 Fikrini Paylaş",
@@ -374,7 +379,6 @@
                     </div>
                 `;
 
-                // Eğer kullanıcı Admin ise sol menüye Yönetim Paneli düğmesini yerleştir
                 if(window.currentUserState.isAdmin) {
                     adminMenuContainer.innerHTML = `
                         <button class="menu-item" onclick="openAdminPanel()" style="color: var(--accent); font-weight: bold; margin-top: 15px;">⚙️ Yönetim Paneli</button>
@@ -432,7 +436,6 @@
         
         function handleOverlayClick(e, id) { if(e.target.id === id) document.getElementById(id).style.display = 'none'; }
 
-        // --- Admin Premium Verme Fonksiyonu ---
         async function adminGivePremium() {
             const targetUidOrEmail = document.getElementById('targetUserUid').value.trim();
             const daysToAdd = parseInt(document.getElementById('premiumDurationSelect').value);
@@ -449,7 +452,6 @@
                 }
 
                 const now = Date.now();
-                // Eğer halihazırda süresi devam ediyorsa üstüne ekle, bitmişse bugünden başlat
                 const baseTime = (currentExpiry > now) ? currentExpiry : now;
                 const newExpiry = baseTime + (daysToAdd * 24 * 60 * 60 * 1000);
 
@@ -491,7 +493,7 @@
             } else {
                 container.innerHTML = `
                     <h3>⭐️ Standart Üyelik</h3>
-                    <p style="color:var(--text-muted)">Şu anda aktif bir premium üyeliğin bulunmuyor. Admin tarafından hesabına süre tanımlandığında burada görünecektir.</p>
+                    <p style="color:var(--text-muted)">Şu anda aktif bir premium üyeliğin bulunmuyor. Admin tarafından süre tanımlandığında burada görünecektir.</p>
                     <p style="font-size:12px; color:var(--text-muted); margin-top:15px;">Kullanıcı ID (UID): <code style="background:var(--bg-input); padding:2px 6px; border-radius:4px;">${window.currentUserState.uid}</code></p>
                 `;
             }
