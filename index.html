@@ -3,9 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Klakz Hub | Professional v3.6 - Ultimate Auth</title>
+    <title>Klakz Hub | Professional v3.7 - Cloud Firebase</title>
     
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'><rect width='100%' height='100%' rx='100' fill='%2312141c'/><path d='M160 120 v260 M200 250 L320 130 M200 250 L320 370' stroke='%2300ec64' stroke-width='45' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
+
+    <!-- Firebase SDK (v9 Modüler) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        // BURAYA KENDİ FIREBASE YAPILANDIRMANI YAPIŞTIRABİLİRSİN
+        const firebaseConfig = {
+            apiKey: "SENIN_API_KEY",
+            authDomain: "SENIN_PROJECT_ID.firebaseapp.com",
+            projectId: "SENIN_PROJECT_ID",
+            storageBucket: "SENIN_PROJECT_ID.appspot.com",
+            messagingSenderId: "SENIN_SENDER_ID",
+            appId: "SENIN_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Global scope'a aktaralım ki arayüz fonksiyonları erişebilsin
+        window.FB_Auth = auth;
+        window.FB_Db = db;
+        window.FB_Methods = { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, collection, addDoc, getDocs, doc, setDoc, getDoc };
+
+        // Sayfa açıldığında oturum kontrolü
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.currentUserState = { isLoggedIn: true, email: user.email, uid: user.uid };
+                updateAuthUI(true, user.email);
+            } else {
+                window.currentUserState = { isLoggedIn: false, email: null, uid: null };
+                updateAuthUI(false, null);
+            }
+        });
+    </script>
 
     <style>
         :root {
@@ -32,7 +69,6 @@
         .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
         .topbar { height: 70px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; background-color: var(--bg-sidebar); }
         
-        /* Bildirim Şeridi */
         .announcement-bar { background: linear-gradient(90deg, var(--accent), var(--accent-hover)); color: #000; font-weight: 600; font-size: 13px; padding: 10px 20px; text-align: center; display: flex; justify-content: space-between; align-items: center; }
         .announcement-bar button { background: rgba(0,0,0,0.2); border: none; color: #000; border-radius: 4px; padding: 2px 8px; cursor: pointer; font-weight: bold; }
 
@@ -67,14 +103,12 @@
         
         .theme-toggle-btn { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 12px; }
         
-        /* Gelişmiş Üst Bar Giriş Butonları */
         .auth-buttons-group { display: flex; gap: 10px; align-items: center; }
         .nav-auth-btn { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
         .nav-auth-btn:hover { border-color: var(--accent); color: var(--accent); }
         .nav-register-btn { background: var(--accent); color: #000; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
         .nav-register-btn:hover { background: var(--accent-hover); }
 
-        /* Modal Form Stilleri */
         .auth-modal-content { width: 400px; max-width: 90%; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 30px; box-sizing: border-box; position: relative; }
         .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); }
         .auth-tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; color: var(--text-muted); font-weight: 600; border-bottom: 2px solid transparent; }
@@ -90,14 +124,12 @@
 </head>
 <body>
 
-    <!-- Bildirim Şeridi -->
     <div id="announcementBar" class="announcement-bar">
-        <span>🎉 Klakz Hub v3.6 yayında! Profesyonel Giriş Yap / Kaydol modal sistemi eklendi.</span>
+        <span>🎉 Klakz Hub v3.7 Bulut Tabanlı Firebase Auth aktif edildi!</span>
         <button onclick="closeAnnouncement()">Kapat</button>
     </div>
 
     <div class="layout-wrapper">
-        <!-- Sol Menü -->
         <div class="sidebar">
             <div class="logo-area">
                 <span>KLAKZ HUB</span>
@@ -115,12 +147,10 @@
             <button class="menu-item" onclick="openAdminPanel()" style="color: var(--accent); font-weight: bold; margin-top: 15px;">⚙️ Yönetim Paneli</button>
         </div>
 
-        <!-- Ana İçerik -->
         <div class="main-content">
             <div class="topbar">
                 <input type="text" id="searchInput" placeholder="Script ara..." oninput="filterScripts()" style="width: 250px; margin:0;">
                 
-                <!-- Üst Bar Hesap / Giriş Alanı -->
                 <div id="authArea">
                     <div class="auth-buttons-group">
                         <button class="nav-auth-btn" onclick="openAuthModal('login')">Giriş Yap</button>
@@ -139,7 +169,6 @@
         </div>
     </div>
 
-    <!-- Gelişmiş Giriş / Kaydol Modalı -->
     <div class="modal-overlay" id="authModal" onclick="handleOverlayClick(event, 'authModal')">
         <div class="auth-modal-content">
             <div class="auth-tabs">
@@ -147,18 +176,15 @@
                 <div class="auth-tab" id="tabRegisterBtn" onclick="switchAuthTab('register')">Kaydol</div>
             </div>
 
-            <!-- Giriş Formu -->
             <div id="loginFormSection">
                 <input type="email" id="loginEmail" placeholder="E-posta adresi">
                 <input type="password" id="loginPass" placeholder="Şifre">
                 <button class="submit-btn" onclick="executeLogin()">Giriş Yap</button>
             </div>
 
-            <!-- Kayıt Formu -->
             <div id="registerFormSection" style="display: none;">
-                <input type="text" id="regName" placeholder="Kullanıcı Adı">
                 <input type="email" id="regEmail" placeholder="E-posta adresi">
-                <input type="password" id="regPass" placeholder="Şifre oluştur">
+                <input type="password" id="regPass" placeholder="Şifre oluştur (Min 6 karakter)">
                 <button class="submit-btn" onclick="executeRegister()">Hesap Oluştur</button>
             </div>
 
@@ -166,7 +192,6 @@
         </div>
     </div>
 
-    <!-- Admin Paneli Modalı -->
     <div class="modal-overlay" id="adminModal" onclick="handleOverlayClick(event, 'adminModal')">
         <div class="card" style="width: 500px; margin: auto; position: relative;">
             <h3 style="margin-top:0;">⚙️ Script Ekleme Paneli</h3>
@@ -184,8 +209,7 @@
     </div>
 
     <script>
-        let authState = JSON.parse(localStorage.getItem('klakz_auth')) || { isLoggedIn: false, name: '', email: '' };
-        let usersDB = JSON.parse(localStorage.getItem('klakz_users_db')) || [];
+        window.currentUserState = { isLoggedIn: false, email: null, uid: null };
         let favorites = JSON.parse(localStorage.getItem('klakz_favorites')) || [];
         let ideasList = JSON.parse(localStorage.getItem('klakz_ideas')) || [];
         
@@ -223,7 +247,7 @@
             },
             changelog: {
                 title: "🚀 Sürüm Notları",
-                content: `<div class="card"><h3>v3.6 Güncellemesi</h3><p style="color:var(--text-muted)">• Kapsamlı yerel **Giriş Yap / Kaydol** şifreli modal sistemi entegre edildi.<br>• Kullanıcı kayıt veritabanı tarayıcı hafızasına güvenli şekilde bağlanarak kalıcı hale getirildi.</p></div>`
+                content: `<div class="card"><h3>v3.7 Güncellemesi</h3><p style="color:var(--text-muted)">• Kullanıcı kimlik doğrulamaları doğrudan **Firebase Cloud Auth** altyapısına bağlandı.<br>• Artık tüm hesap verilerin bulutta güvenle saklanmaktadır.</p></div>`
             },
             ideas: {
                 title: "💡 Fikrini Paylaş",
@@ -241,11 +265,10 @@
                 content: `
                     <div class="card">
                         <h3>Bize Ulaşın</h3>
-                        <p style="color:var(--text-muted)">Bir hata bildirmek, öneri sunmak veya destek almak için aşağıdaki kanalları kullanabilirsiniz:</p>
+                        <p style="color:var(--text-muted)">Bir hata bildirmek, öneri sunmak veya destek almak için:</p>
                         <ul style="color:var(--text-main); line-height: 2; padding-left: 20px;">
                             <li>💬 <b>Discord:</b> <a href="https://discord.gg/zT3W2BNMq" target="_blank" style="color:var(--accent); text-decoration:none;">discord.gg/zT3W2BNMq</a></li>
                             <li>📧 <b>E-posta:</b> destek@klakzhub.com</li>
-                            <li>💻 <b>GitHub:</b> github.com/lrbear</li>
                         </ul>
                     </div>
                 `
@@ -253,7 +276,6 @@
         };
 
         window.addEventListener('DOMContentLoaded', () => {
-            updateAuthUI();
             renderSidebar();
             switchCategory('roblox');
             updateFavBadge();
@@ -273,7 +295,6 @@
             localStorage.setItem('klakz_announcement_closed', 'true');
         }
 
-        // --- AUTH MODAL & SİSTEMLERİ ---
         function openAuthModal(mode) {
             document.getElementById('authModal').style.display = 'flex';
             switchAuthTab(mode);
@@ -302,70 +323,50 @@
             }
         }
 
-        function executeRegister() {
-            const name = document.getElementById('regName').value.trim();
+        async function executeRegister() {
             const email = document.getElementById('regEmail').value.trim();
             const pass = document.getElementById('regPass').value.trim();
+            if(!email || !pass) return alert('Alanları doldurun!');
 
-            if(!name || !email || !pass) {
-                alert('Lütfen tüm kayıt alanlarını doldurun!');
-                return;
+            try {
+                await window.FB_Methods.createUserWithEmailAndPassword(window.FB_Auth, email, pass);
+                closeAuthModal();
+                alert('Bulut hesabı başarıyla oluşturuldu!');
+            } catch (error) {
+                alert('Kayıt hatası: ' + error.message);
             }
-
-            const existing = usersDB.find(u => u.email === email);
-            if(existing) {
-                alert('Bu e-posta adresiyle zaten bir hesap kayıtlı!');
-                return;
-            }
-
-            const newUser = { name, email, pass };
-            usersDB.push(newUser);
-            localStorage.setItem('klakz_users_db', JSON.stringify(usersDB));
-
-            authState = { isLoggedIn: true, name, email };
-            localStorage.setItem('klakz_auth', JSON.stringify(authState));
-
-            closeAuthModal();
-            updateAuthUI();
-            alert('Kayıt başarılı! Hoş geldin, ' + name);
         }
 
-        function executeLogin() {
+        async function executeLogin() {
             const email = document.getElementById('loginEmail').value.trim();
             const pass = document.getElementById('loginPass').value.trim();
+            if(!email || !pass) return alert('Alanları doldurun!');
 
-            if(!email || !pass) {
-                alert('Lütfen e-posta ve şifrenizi girin!');
-                return;
+            try {
+                await window.FB_Methods.signInWithEmailAndPassword(window.FB_Auth, email, pass);
+                closeAuthModal();
+                alert('Bulut hesabına giriş yapıldı!');
+            } catch (error) {
+                alert('Giriş hatası: ' + error.message);
             }
-
-            const user = usersDB.find(u => u.email === email && u.pass === pass);
-            if(!user) {
-                alert('E-posta veya şifre hatalı! Lütfen kontrol edin.');
-                return;
-            }
-
-            authState = { isLoggedIn: true, name: user.name, email: user.email };
-            localStorage.setItem('klakz_auth', JSON.stringify(authState));
-
-            closeAuthModal();
-            updateAuthUI();
-            alert('Giriş başarılı! Tekrar hoş geldin, ' + user.name);
         }
 
-        function handleLogout() {
-            authState = { isLoggedIn: false, name: '', email: '' };
-            localStorage.removeItem('klakz_auth');
-            location.reload();
+        async function handleLogout() {
+            try {
+                await window.FB_Methods.signOut(window.FB_Auth);
+                location.reload();
+            } catch (error) {
+                alert('Çıkış yapılırken hata oluştu.');
+            }
         }
 
-        function updateAuthUI() {
+        window.updateAuthUI = function(isLoggedIn, email) {
             const authArea = document.getElementById('authArea');
-            if(authState.isLoggedIn) {
+            if(isLoggedIn) {
                 authArea.innerHTML = `
                     <div class="user-pill">
-                        <span>👤</span>
-                        <span style="font-size:13px; font-weight:600;">${authState.name}</span>
+                        <span>☁️</span>
+                        <span style="font-size:13px; font-weight:600;">${email}</span>
                         <button onclick="handleLogout()" style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:11px; padding:0; margin-left:5px;" title="Çıkış Yap">Çıkış</button>
                     </div>
                 `;
@@ -405,11 +406,11 @@
         }
 
         function openAdminPanel() {
-            if(!authState.isLoggedIn) { 
+            if(!window.currentUserState.isLoggedIn) { 
                 const authArea = document.getElementById('authArea');
                 authArea.classList.add('auth-pulse');
                 setTimeout(() => authArea.classList.remove('auth-pulse'), 3000);
-                alert('Yönetim paneline erişmek için önce giriş yapmalı veya kaydolmalısın!'); 
+                alert('Yönetim paneli için bulut hesabınızla giriş yapmalısınız!'); 
                 openAuthModal('login');
                 return; 
             }
