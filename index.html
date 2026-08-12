@@ -56,12 +56,107 @@
         .fav-btn { background: none; border: 1px solid var(--border-color); color: var(--text-muted); padding: 8px 12px; border-radius: 6px; cursor: pointer; }
         .fav-btn.favorited { color: #ff4d4d; border-color: #ff4d4d; background-color: rgba(255, 77, 77, 0.1); }
 
-        /* Yeni Şık Gmail Giriş Modalı Tasarımı */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); z-index: 1000; justify-content: center; align-items: center; }
-        .google-modal-box { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; width: 400px; max-width: 90%; padding: 40px 30px; box-sizing: border-box; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
-        .google-logo-icon { font-size: 36px; margin-bottom: 10px; }
-        .google-title { font-size: 22px; font-weight: 600; margin-bottom: 8px; color: var(--text-main); }
-        .google-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 25px; }
+        /* --- BİREBİR GOOGLE GİRİŞ POPUP EKRANI TASARIMI --- */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; }
+        
+        .google-popup-card {
+            background-color: #ffffff;
+            color: #202124;
+            border-radius: 8px;
+            width: 450px;
+            max-width: 95%;
+            padding: 40px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+            font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+            text-align: left;
+        }
+
+        .google-brand {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 22px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .google-brand span:nth-child(1) { color: #4285F4; }
+        .google-brand span:nth-child(2) { color: #EA4335; }
+        .google-brand span:nth-child(3) { color: #FBBC05; }
+        .google-brand span:nth-child(4) { color: #4285F4; }
+        .google-brand span:nth-child(5) { color: #34A853; }
+        .google-brand span:nth-child(6) { color: #EA4335; }
+
+        .google-popup-card h2 {
+            font-size: 24px;
+            font-weight: 400;
+            margin: 0 0 8px 0;
+            color: #202124;
+        }
+
+        .google-popup-card p {
+            font-size: 14px;
+            color: #5f6368;
+            margin: 0 0 24px 0;
+        }
+
+        .google-input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .google-input-group input {
+            background-color: #fff !important;
+            color: #202124 !important;
+            border: 1px solid #dadce0 !important;
+            border-radius: 4px !important;
+            padding: 14px !important;
+            font-size: 16px !important;
+            width: 100%;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .google-input-group input:focus {
+            border-color: #1a73e8 !important;
+            border-width: 2px !important;
+            padding: 13px !important;
+        }
+
+        .google-btn-primary {
+            background-color: #1a73e8;
+            color: #ffffff;
+            font-weight: 500;
+            font-size: 14px;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 24px;
+            cursor: pointer;
+            float: right;
+            transition: background-color 0.2s;
+        }
+
+        .google-btn-primary:hover {
+            background-color: #1557b0;
+        }
+
+        .google-btn-text {
+            background: none;
+            border: none;
+            color: #1a73e8;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 10px 0;
+            float: left;
+        }
+
+        .google-btn-text:hover {
+            background-color: rgba(26,115,232,0.04);
+        }
+
         .user-pill { display: flex; align-items: center; gap: 10px; background: var(--bg-input); padding: 8px 15px; border-radius: 20px; border: 1px solid var(--border-color); }
     </style>
 </head>
@@ -100,23 +195,27 @@
         </div>
     </div>
 
-    <!-- Yeni Nesil Google / Gmail Giriş Modalı -->
+    <!-- Birebir Google Giriş Penceresi Modalı -->
     <div class="modal-overlay" id="loginModal" onclick="handleOverlayClick(event, 'loginModal')">
-        <div class="google-modal-box">
-            <div class="google-logo-icon">🌐</div>
-            <div class="google-title">Klakz Hub'a Bağlan</div>
-            <div class="google-subtitle">Devam etmek için adını ve Gmail adresini gir</div>
-            
-            <div style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
-                <label style="font-size: 12px; color: var(--text-muted);">Ad Soyad</label>
-                <input type="text" id="loginName" placeholder="Örn: Ahmet Yılmaz">
-                
-                <label style="font-size: 12px; color: var(--text-muted);">Gmail Adresi</label>
-                <input type="email" id="loginGmail" placeholder="ornek@gmail.com">
-                
-                <button class="submit-btn" style="margin-top: 10px;" onclick="handleLogin()">Google ile Devam Et</button>
+        <div class="google-popup-card">
+            <div class="google-brand">
+                <span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span>
             </div>
-            <button style="background:none; border:none; color:var(--text-muted); margin-top:15px; cursor:pointer; font-size:12px;" onclick="closeLoginModal()">Vazgeç</button>
+            <h2>Oturum Açın</h2>
+            <p>Klakz Hub'ı kullanmak için Google Hesabınızı kullanın</p>
+            
+            <div class="google-input-group">
+                <input type="text" id="loginName" placeholder="Adınız ve Soyadınız">
+            </div>
+            
+            <div class="google-input-group">
+                <input type="email" id="loginGmail" placeholder="E-posta veya telefon (örn: @gmail.com)">
+            </div>
+            
+            <div style="overflow: hidden; margin-top: 10px;">
+                <button class="google-btn-text" onclick="closeLoginModal()">İptal</button>
+                <button class="google-btn-primary" onclick="handleLogin()">İleri</button>
+            </div>
         </div>
     </div>
 
@@ -173,7 +272,7 @@
             },
             changelog: {
                 title: "🚀 Sürüm Notları",
-                content: `<div class="card"><h3>v3.0 Güncellemesi</h3><p style="color:var(--text-muted)">• Yeni nesil Google / Gmail giriş ekranı entegre edildi.<br>• Akıcı arayüz optimizasyonları yapıldı.</p></div>`
+                content: `<div class="card"><h3>v3.1 Güncellemesi</h3><p style="color:var(--text-muted)">• Orijinal Google oturum açma penceresi tasarımı entegre edildi.</p></div>`
             },
             ideas: {
                 title: "💡 Fikrini Paylaş",
@@ -224,7 +323,7 @@
             const name = document.getElementById('loginName').value.trim();
             const email = document.getElementById('loginGmail').value.trim();
             if(!name || !email.includes('@gmail.com')) {
-                alert('Lütfen geçerli bir ad soyad ve @gmail.com adresi girin!');
+                alert('Lütfen geçerli bir ad ve @gmail.com adresi girin!');
                 return;
             }
             
