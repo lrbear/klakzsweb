@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Klakz Hub | Professional v3.8 - Google Auth</title>
+    <title>Klakz Hub | Professional v3.9 - Admin & Premium System</title>
     
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'><rect width='100%' height='100%' rx='100' fill='%2312141c'/><path d='M160 120 v260 M200 250 L320 130 M200 250 L320 370' stroke='%2300ec64' stroke-width='45' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
 
@@ -11,6 +11,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDpuJm6D9752OUXZ12L__agm3UmOI1I7Dw",
@@ -25,18 +26,46 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
         window.FB_Auth = auth;
+        window.FB_Db = db;
         window.FB_Provider = provider;
-        window.FB_Methods = { signInWithPopup, signOut, onAuthStateChanged };
+        window.FB_Methods = { signInWithPopup, signOut, onAuthStateChanged, doc, setDoc, getDoc, collection, getDocs };
 
-        onAuthStateChanged(auth, (user) => {
+        // Admin e-postanızı buraya yazabilirsiniz (kendi Google hesabınız)
+        const ADMIN_EMAIL = "lrbear@gmail.com"; 
+
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
-                window.currentUserState = { isLoggedIn: true, email: user.email, name: user.displayName, photo: user.photoURL };
+                const isAdmin = (user.email === ADMIN_EMAIL);
+                
+                // Firestore'dan kullanıcının güncel premium süresini çekelim
+                let premiumExpiry = 0;
+                try {
+                    const userDocRef = doc(db, "users", user.uid);
+                    const docSnap = await getDoc(userDocRef);
+                    if (docSnap.exists()) {
+                        premiumExpiry = docSnap.data().premiumExpiry || 0;
+                    } else {
+                        // İlk kez giriş yapıyorsa Firestore'a kayıt oluşturalım
+                        await setDoc(userDocRef, { email: user.email, premiumExpiry: 0 }, { merge: true });
+                    }
+                } catch(e) { console.log(e); }
+
+                window.currentUserState = { 
+                    isLoggedIn: true, 
+                    email: user.email, 
+                    name: user.displayName, 
+                    uid: user.uid,
+                    isAdmin: isAdmin,
+                    premiumExpiry: premiumExpiry
+                };
+
                 updateAuthUI(true, user.displayName || user.email);
             } else {
-                window.currentUserState = { isLoggedIn: false, email: null, name: null };
+                window.currentUserState = { isLoggedIn: false, email: null, name: null, uid: null, isAdmin: false, premiumExpiry: 0 };
                 updateAuthUI(false, null);
             }
         });
@@ -47,11 +76,13 @@
             --bg-body: #0b0c10; --bg-sidebar: #12141c; --bg-card: #15171e;
             --bg-input: #1a1c23; --border-color: #1f2330; --text-main: #ffffff;
             --text-muted: #a0a6b8; --accent: #00ec64; --accent-hover: #00b34a;
+            --premium: #f59e0b; --premium-hover: #d97706;
         }
         [data-theme="light"] {
             --bg-body: #f0f2f5; --bg-sidebar: #ffffff; --bg-card: #ffffff;
             --bg-input: #f8f9fa; --border-color: #d1d5db; --text-main: #111827;
             --text-muted: #4b5563; --accent: #059669; --accent-hover: #047857;
+            --premium: #d97706; --premium-hover: #b45309;
         }
         body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; display: flex; min-height: 100vh; flex-direction: column; }
         
@@ -79,6 +110,7 @@
         input, select, textarea { background-color: var(--bg-input) !important; color: var(--text-main) !important; border: 1px solid var(--border-color) !important; border-radius: 8px !important; padding: 12px !important; outline: none !important; width: 100%; box-sizing: border-box; font-family: inherit; margin-bottom: 10px; }
         
         .submit-btn { background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: #000; font-weight: bold; border: none; border-radius: 8px; padding: 12px 20px; cursor: pointer; width: 100%; }
+        .premium-submit-btn { background: linear-gradient(135deg, var(--premium), var(--premium-hover)); color: #000; font-weight: bold; border: none; border-radius: 8px; padding: 12px 20px; cursor: pointer; width: 100%; }
         
         .google-login-btn { background-color: #ffffff; color: #111111; font-weight: 600; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 20px; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; font-size: 14px; }
         .google-login-btn:hover { background-color: #f1f3f4; }
@@ -120,7 +152,7 @@
 <body>
 
     <div id="announcementBar" class="announcement-bar">
-        <span>🎉 Klakz Hub v3.8 - Google ile Güvenli Giriş Aktif!</span>
+        <span>🎉 Klakz Hub v3.9 - Admin & Premium Sistemi Yayında!</span>
         <button onclick="closeAnnouncement()">Kapat</button>
     </div>
 
@@ -136,10 +168,13 @@
 
             <div style="margin-top: 20px;" class="menu-category">Özel Alanlar</div>
             <button class="menu-item" onclick="switchCategory('favorites', this)">❤️ Favorilerim (<span id="favCountBadge">0</span>)</button>
+            <button class="menu-item" onclick="switchCategory('premium', this)" style="color: var(--premium); font-weight: bold;">⭐️ Premium Üyelik</button>
             <button class="menu-item" onclick="switchCategory('changelog', this)">🚀 Sürüm Notları</button>
             <button class="menu-item" onclick="switchCategory('ideas', this)">💡 Fikrini Paylaş</button>
             <button class="menu-item" onclick="switchCategory('contact', this)">📬 İletişim & Destek</button>
-            <button class="menu-item" onclick="openAuthModal()" style="color: var(--accent); font-weight: bold; margin-top: 15px;">⚙️ Yönetim Paneli</button>
+            
+            <!-- Yönetim Paneli Butonu (Sadece Adminlere Açılır/Görünür) -->
+            <div id="adminMenuContainer"></div>
         </div>
 
         <div class="main-content">
@@ -165,7 +200,7 @@
     <div class="modal-overlay" id="authModal" onclick="handleOverlayClick(event, 'authModal')">
         <div class="auth-modal-content">
             <h3 style="margin-top:0; color:var(--text-main);">Klakz Hub'a Hoş Geldin</h3>
-            <p style="color:var(--text-muted); font-size:13px; margin-bottom:25px;">Yönetim paneline erişmek ve favorilerini kaydetmek için Google hesabınla devam et.</p>
+            <p style="color:var(--text-muted); font-size:13px; margin-bottom:25px;">Google hesabınla giriş yaparak üyelik avantajlarından faydalanabilirsin.</p>
             
             <button class="google-login-btn" onclick="loginWithGoogle()">
                 <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
@@ -178,8 +213,23 @@
 
     <!-- Admin Paneli Modalı -->
     <div class="modal-overlay" id="adminModal" onclick="handleOverlayClick(event, 'adminModal')">
-        <div class="card" style="width: 500px; margin: auto; position: relative;">
-            <h3 style="margin-top:0;">⚙️ Script Ekleme Paneli</h3>
+        <div class="card" style="width: 520px; margin: auto; position: relative; max-height: 90vh; overflow-y: auto;">
+            <h3 style="margin-top:0; color:var(--accent);">⚙️ Admin Paneli</h3>
+            
+            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;">
+                <h4 style="margin: 0 0 10px 0; color:var(--premium);">⭐️ Kullanıcıya Premium Ver</h4>
+                <input type="text" id="targetUserUid" placeholder="Kullanıcı UID veya E-posta gir...">
+                <select id="premiumDurationSelect">
+                    <option value="5">5 Günlük Premium</option>
+                    <option value="10">10 Günlük Premium</option>
+                    <option value="15">15 Günlük Premium</option>
+                    <option value="20">20 Günlük Premium</option>
+                    <option value="30" selected>30 Günlük Premium</option>
+                </select>
+                <button class="premium-submit-btn" onclick="adminGivePremium()">Premium Tanımla</button>
+            </div>
+
+            <h4 style="margin: 0 0 10px 0;">📦 Yeni Script Yayınla</h4>
             <select id="targetGameSelect"></select>
             <input type="text" id="newScriptTitle" placeholder="Script Başlığı">
             <input type="text" id="newScriptDesc" placeholder="Kısa Açıklama">
@@ -189,12 +239,13 @@
             </select>
             <textarea id="newScriptCode" rows="3" placeholder="loadstring(...)()"></textarea>
             <button class="submit-btn" onclick="adminAddScript()">Scripti Yayınla</button>
-            <button style="background:none; border:none; color:var(--text-muted); width:100%; margin-top:10px; cursor:pointer;" onclick="closeAdminPanel()">Kapat</button>
+            
+            <button style="background:none; border:none; color:var(--text-muted); width:100%; margin-top:15px; cursor:pointer;" onclick="closeAdminPanel()">Kapat</button>
         </div>
     </div>
 
     <script>
-        window.currentUserState = { isLoggedIn: false, email: null, name: null };
+        window.currentUserState = { isLoggedIn: false, email: null, name: null, uid: null, isAdmin: false, premiumExpiry: 0 };
         let favorites = JSON.parse(localStorage.getItem('klakz_favorites')) || [];
         let ideasList = JSON.parse(localStorage.getItem('klakz_ideas')) || [];
         
@@ -230,9 +281,13 @@
                 title: "❤️ Favori Scriptlerim",
                 content: `<div id="favGrid" class="script-grid"></div>`
             },
+            premium: {
+                title: "⭐️ Premium Üyelik Durumu",
+                content: `<div id="premiumAreaContent" class="card"></div>`
+            },
             changelog: {
                 title: "🚀 Sürüm Notları",
-                content: `<div class="card"><h3>v3.8 Güncellemesi</h3><p style="color:var(--text-muted)">• Karmaşık şifre formları kaldırıldı ve **Google ile Güvenli Giriş** sistemi entegre edildi.</p></div>`
+                content: `<div class="card"><h3>v3.9 Güncellemesi</h3><p style="color:var(--text-muted)">• Bulut tabanlı **Admin ve Süreli Premium** (5, 10, 15, 20, 30 gün) sistemi eklendi.<br>• Yetkilendirmeler Firestore altyapısı ile güvenceye alındı.</p></div>`
             },
             ideas: {
                 title: "💡 Fikrini Paylaş",
@@ -280,14 +335,7 @@
         }
 
         function openAuthModal() {
-            if(window.currentUserState.isLoggedIn) {
-                document.getElementById('adminModal').style.display = 'flex';
-                let h = '';
-                for(let k in categoryData) h += `<option value="${k}">${categoryData[k].title}</option>`;
-                document.getElementById('targetGameSelect').innerHTML = h;
-            } else {
-                document.getElementById('authModal').style.display = 'flex';
-            }
+            document.getElementById('authModal').style.display = 'flex';
         }
 
         function closeAuthModal() {
@@ -315,6 +363,8 @@
 
         window.updateAuthUI = function(isLoggedIn, labelText) {
             const authArea = document.getElementById('authArea');
+            const adminMenuContainer = document.getElementById('adminMenuContainer');
+
             if(isLoggedIn) {
                 authArea.innerHTML = `
                     <div class="user-pill">
@@ -323,11 +373,23 @@
                         <button onclick="handleLogout()" style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:11px; padding:0; margin-left:5px;" title="Çıkış Yap">Çıkış</button>
                     </div>
                 `;
+
+                // Eğer kullanıcı Admin ise sol menüye Yönetim Paneli düğmesini yerleştir
+                if(window.currentUserState.isAdmin) {
+                    adminMenuContainer.innerHTML = `
+                        <button class="menu-item" onclick="openAdminPanel()" style="color: var(--accent); font-weight: bold; margin-top: 15px;">⚙️ Yönetim Paneli</button>
+                    `;
+                } else {
+                    adminMenuContainer.innerHTML = "";
+                }
             } else {
                 authArea.innerHTML = `
                     <button class="nav-auth-btn" onclick="openAuthModal()">Giriş Yap / Kaydol</button>
                 `;
+                adminMenuContainer.innerHTML = "";
             }
+
+            if(currentKey === 'premium') renderPremiumStatus();
         }
 
         function renderSidebar() {
@@ -352,16 +414,13 @@
             `;
 
             if(key === 'favorites') renderFavorites();
+            if(key === 'premium') renderPremiumStatus();
             if(key === 'ideas') renderPublicIdeas();
         }
 
         function openAdminPanel() {
-            if(!window.currentUserState.isLoggedIn) { 
-                const authArea = document.getElementById('authArea');
-                authArea.classList.add('auth-pulse');
-                setTimeout(() => authArea.classList.remove('auth-pulse'), 3000);
-                alert('Yönetim paneli için önce Google ile giriş yapmalısın!'); 
-                openAuthModal();
+            if(!window.currentUserState.isLoggedIn || !window.currentUserState.isAdmin) { 
+                alert('Bu panele yalnızca Admin erişebilir!'); 
                 return; 
             }
             document.getElementById('adminModal').style.display = 'flex';
@@ -372,6 +431,71 @@
         function closeAdminPanel() { document.getElementById('adminModal').style.display = 'none'; }
         
         function handleOverlayClick(e, id) { if(e.target.id === id) document.getElementById(id).style.display = 'none'; }
+
+        // --- Admin Premium Verme Fonksiyonu ---
+        async function adminGivePremium() {
+            const targetUidOrEmail = document.getElementById('targetUserUid').value.trim();
+            const daysToAdd = parseInt(document.getElementById('premiumDurationSelect').value);
+            
+            if(!targetUidOrEmail) return alert('Lütfen kullanıcı kimliği (UID) veya e-postası girin!');
+
+            try {
+                const userDocRef = window.FB_Methods.doc(window.FB_Db, "users", targetUidOrEmail);
+                const docSnap = await window.FB_Methods.getDoc(userDocRef);
+
+                let currentExpiry = 0;
+                if(docSnap.exists()) {
+                    currentExpiry = docSnap.data().premiumExpiry || 0;
+                }
+
+                const now = Date.now();
+                // Eğer halihazırda süresi devam ediyorsa üstüne ekle, bitmişse bugünden başlat
+                const baseTime = (currentExpiry > now) ? currentExpiry : now;
+                const newExpiry = baseTime + (daysToAdd * 24 * 60 * 60 * 1000);
+
+                await window.FB_Methods.setDoc(userDocRef, { premiumExpiry: newExpiry }, { merge: true });
+                alert(`Başarılı! Kullanıcıya ${daysToAdd} günlük premium süre tanımlandı.`);
+                document.getElementById('targetUserUid').value = '';
+                closeAdminPanel();
+            } catch(e) {
+                alert('Hata oluştu: ' + e.message);
+            }
+        }
+
+        function renderPremiumStatus() {
+            const container = document.getElementById('premiumAreaContent');
+            if(!container) return;
+
+            if(!window.currentUserState.isLoggedIn) {
+                container.innerHTML = `
+                    <h3>⭐️ Premium Ayrıcalıkları</h3>
+                    <p style="color:var(--text-muted)">Premium üyelik durumunu görmek ve avantajlardan yararlanmak için lütfen önce Google ile giriş yap.</p>
+                    <button class="nav-auth-btn" style="margin-top:10px;" onclick="openAuthModal()">Giriş Yap</button>
+                `;
+                return;
+            }
+
+            const now = Date.now();
+            const expiry = window.currentUserState.premiumExpiry;
+            const isPremium = expiry > now;
+
+            if(isPremium) {
+                const remainingDays = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
+                const expiryDateStr = new Date(expiry).toLocaleDateString('tr-TR');
+                container.innerHTML = `
+                    <h3 style="color:var(--premium);">⭐️ Premium Üyeliğin Aktif!</h3>
+                    <p style="color:var(--text-main); font-size:15px; margin-top:10px;">Durum: <b style="color:var(--accent);">Aktif</b></p>
+                    <p style="color:var(--text-muted)">Kalan Süre: <b>${remainingDays} Gün</b></p>
+                    <p style="color:var(--text-muted)">Bitiş Tarihi: ${expiryDateStr}</p>
+                `;
+            } else {
+                container.innerHTML = `
+                    <h3>⭐️ Standart Üyelik</h3>
+                    <p style="color:var(--text-muted)">Şu anda aktif bir premium üyeliğin bulunmuyor. Admin tarafından hesabına süre tanımlandığında burada görünecektir.</p>
+                    <p style="font-size:12px; color:var(--text-muted); margin-top:15px;">Kullanıcı ID (UID): <code style="background:var(--bg-input); padding:2px 6px; border-radius:4px;">${window.currentUserState.uid}</code></p>
+                `;
+            }
+        }
 
         function copyScript(btn) {
             const rawCode = decodeURIComponent(btn.getAttribute('data-code'));
@@ -405,14 +529,14 @@
             let h = '';
             favorites.forEach(f => {
                 h += `
-                    <script-card class="script-card">
+                    <div class="script-card">
                         <div class="script-title">${f.title}</div>
                         <div class="script-desc">${f.desc}</div>
                         <div class="card-actions">
                             <button class="copy-btn" onclick="copyScript(this)" data-code="${encodeURIComponent(f.code)}">Kopyala</button>
                             <button class="fav-btn favorited" onclick="toggleFavorite(this, '${f.title}', '${f.desc}', '${encodeURIComponent(f.code)}')">❤️</button>
                         </div>
-                    </script-card>
+                    </div>
                 `;
             });
             grid.innerHTML = h;
