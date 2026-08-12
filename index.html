@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Klakz Hub - Gelişmiş Yönetim Paneli</title>
+    <title>Klakz Hub | Professional v3.3</title>
     
+    <!-- Google Identity Services Kütüphanesi -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'><rect width='100%' height='100%' rx='100' fill='%2312141c'/><path d='M160 120 v260 M200 250 L320 130 M200 250 L320 370' stroke='%2300ec64' stroke-width='45' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
 
     <style>
@@ -18,10 +21,12 @@
             --bg-input: #f8f9fa; --border-color: #d1d5db; --text-main: #111827;
             --text-muted: #4b5563; --accent: #059669; --accent-hover: #047857;
         }
-        body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; display: flex; min-height: 100vh; }
+        body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; display: flex; min-height: 100vh; flex-direction: column; }
         
+        .layout-wrapper { display: flex; flex: 1; min-height: 0; }
+
         .sidebar { width: 260px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; flex-shrink: 0; }
-        .logo-area { font-size: 20px; font-weight: bold; color: var(--accent); margin-bottom: 25px; display: flex; align-items: center; gap: 12px; }
+        .logo-area { font-size: 20px; font-weight: bold; color: var(--accent); margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; }
         .menu-category { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
         .menu-item { padding: 10px 12px; border-radius: 8px; color: var(--text-muted); cursor: pointer; margin-bottom: 5px; text-decoration: none; display: block; border: none; background: none; width: 100%; text-align: left; font-size: 14px; transition: 0.2s; }
         .menu-item:hover, .menu-item.active { background-color: var(--bg-input); color: var(--text-main); }
@@ -30,6 +35,10 @@
         .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
         .topbar { height: 70px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; background-color: var(--bg-sidebar); }
         
+        /* Bildirim Şeridi */
+        .announcement-bar { background: linear-gradient(90deg, var(--accent), var(--accent-hover)); color: #000; font-weight: 600; font-size: 13px; padding: 10px 20px; text-align: center; display: flex; justify-content: space-between; align-items: center; }
+        .announcement-bar button { background: rgba(0,0,0,0.2); border: none; color: #000; border-radius: 4px; padding: 2px 8px; cursor: pointer; font-weight: bold; }
+
         .banner-ad-container { background-color: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 10px 30px; text-align: center; }
         .banner-ad-box { background: var(--bg-input); border: 1px dashed var(--border-color); border-radius: 6px; padding: 8px; color: var(--text-muted); font-size: 12px; max-width: 728px; margin: 0 auto; }
 
@@ -56,165 +65,70 @@
         .fav-btn { background: none; border: 1px solid var(--border-color); color: var(--text-muted); padding: 8px 12px; border-radius: 6px; cursor: pointer; }
         .fav-btn.favorited { color: #ff4d4d; border-color: #ff4d4d; background-color: rgba(255, 77, 77, 0.1); }
 
-        /* --- BİREBİR GOOGLE GİRİŞ POPUP EKRANI TASARIMI --- */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); z-index: 1000; justify-content: center; align-items: center; }
+        .user-pill { display: flex; align-items: center; gap: 10px; background: var(--bg-input); padding: 6px 15px; border-radius: 20px; border: 1px solid var(--border-color); }
+        .user-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
         
-        .google-popup-card {
-            background-color: #ffffff;
-            color: #202124;
-            border-radius: 8px;
-            width: 450px;
-            max-width: 95%;
-            padding: 40px;
-            box-sizing: border-box;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.25);
-            font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
-            text-align: left;
+        .theme-toggle-btn { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 12px; }
+        
+        /* Giriş Yapılmadı Uyarısı Vurgusu */
+        .auth-pulse { animation: pulseGlow 1.5s infinite; border: 2px solid var(--accent) !important; }
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(0, 236, 100, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 236, 100, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 236, 100, 0); }
         }
-
-        .google-brand {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 22px;
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
-
-        .google-brand span:nth-child(1) { color: #4285F4; }
-        .google-brand span:nth-child(2) { color: #EA4335; }
-        .google-brand span:nth-child(3) { color: #FBBC05; }
-        .google-brand span:nth-child(4) { color: #4285F4; }
-        .google-brand span:nth-child(5) { color: #34A853; }
-        .google-brand span:nth-child(6) { color: #EA4335; }
-
-        .google-popup-card h2 {
-            font-size: 24px;
-            font-weight: 400;
-            margin: 0 0 8px 0;
-            color: #202124;
-        }
-
-        .google-popup-card p {
-            font-size: 14px;
-            color: #5f6368;
-            margin: 0 0 24px 0;
-        }
-
-        .google-input-group {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .google-input-group input {
-            background-color: #fff !important;
-            color: #202124 !important;
-            border: 1px solid #dadce0 !important;
-            border-radius: 4px !important;
-            padding: 14px !important;
-            font-size: 16px !important;
-            width: 100%;
-            box-sizing: border-box;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .google-input-group input:focus {
-            border-color: #1a73e8 !important;
-            border-width: 2px !important;
-            padding: 13px !important;
-        }
-
-        .google-btn-primary {
-            background-color: #1a73e8;
-            color: #ffffff;
-            font-weight: 500;
-            font-size: 14px;
-            border: none;
-            border-radius: 4px;
-            padding: 10px 24px;
-            cursor: pointer;
-            float: right;
-            transition: background-color 0.2s;
-        }
-
-        .google-btn-primary:hover {
-            background-color: #1557b0;
-        }
-
-        .google-btn-text {
-            background: none;
-            border: none;
-            color: #1a73e8;
-            font-weight: 500;
-            font-size: 14px;
-            cursor: pointer;
-            padding: 10px 0;
-            float: left;
-        }
-
-        .google-btn-text:hover {
-            background-color: rgba(26,115,232,0.04);
-        }
-
-        .user-pill { display: flex; align-items: center; gap: 10px; background: var(--bg-input); padding: 8px 15px; border-radius: 20px; border: 1px solid var(--border-color); }
     </style>
 </head>
 <body>
 
-    <!-- Sol Menü -->
-    <div class="sidebar">
-        <div class="logo-area">KLAKZ HUB</div>
-        
-        <div class="menu-category">Oyun Kategorileri</div>
-        <div id="sidebarCategories"></div>
-
-        <div style="margin-top: 20px;" class="menu-category">Özel Alanlar</div>
-        <button class="menu-item" onclick="switchCategory('favorites', this)">❤️ Favorilerim (<span id="favCountBadge">0</span>)</button>
-        <button class="menu-item" onclick="switchCategory('changelog', this)">🚀 Sürüm Notları</button>
-        <button class="menu-item" onclick="switchCategory('ideas', this)">💡 Fikrini Paylaş</button>
-        <button class="menu-item" onclick="openAdminPanel()" style="color: var(--accent); font-weight: bold; margin-top: 15px;">⚙️ Yönetim Paneli</button>
+    <!-- Bildirim Şeridi -->
+    <div id="announcementBar" class="announcement-bar">
+        <span>🎉 Klakz Hub v3.3 yayında! Google Giriş ve Tema hafızası eklendi.</span>
+        <button onclick="closeAnnouncement()">Kapat</button>
     </div>
 
-    <!-- Ana İçerik -->
-    <div class="main-content">
-        <div class="topbar">
-            <input type="text" id="searchInput" placeholder="Script ara..." oninput="filterScripts()" style="width: 250px; margin:0;">
-            
-            <div id="authArea">
-                <button id="authBtn" class="submit-btn" style="width: auto; padding: 8px 16px;" onclick="openLoginModal()">👤 Gmail ile Giriş</button>
+    <div class="layout-wrapper">
+        <!-- Sol Menü -->
+        <div class="sidebar">
+            <div class="logo-area">
+                <span>KLAKZ HUB</span>
+                <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn">☀️ / 🌙</button>
             </div>
+            
+            <div class="menu-category">Oyun Kategorileri</div>
+            <div id="sidebarCategories"></div>
+
+            <div style="margin-top: 20px;" class="menu-category">Özel Alanlar</div>
+            <button class="menu-item" onclick="switchCategory('favorites', this)">❤️ Favorilerim (<span id="favCountBadge">0</span>)</button>
+            <button class="menu-item" onclick="switchCategory('changelog', this)">🚀 Sürüm Notları</button>
+            <button class="menu-item" onclick="switchCategory('ideas', this)">💡 Fikrini Paylaş</button>
+            <button class="menu-item" onclick="switchCategory('contact', this)">📬 İletişim & Destek</button>
+            <button class="menu-item" onclick="openAdminPanel()" style="color: var(--accent); font-weight: bold; margin-top: 15px;">⚙️ Yönetim Paneli</button>
         </div>
 
-        <div class="banner-ad-container">
-            <div class="banner-ad-box">📢 [ Google Adsense / Sponsor Reklam Alanı ]</div>
-        </div>
+        <!-- Ana İçerik -->
+        <div class="main-content">
+            <div class="topbar">
+                <input type="text" id="searchInput" placeholder="Script ara..." oninput="filterScripts()" style="width: 250px; margin:0;">
+                
+                <div id="authArea">
+                    <!-- Google Resmi Giriş Butonu Alanı -->
+                    <div id="g_id_onload"
+                         data-client_id="BURAYA_GOOGLE_CLOUD_DAN_ALDIGIN_CLIENT_ID_YAZ"
+                         data-callback="handleCredentialResponse"
+                         data-auto_prompt="false">
+                    </div>
+                    <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_black" data-text="signin_with" data-size="large"></div>
+                </div>
+            </div>
 
-        <div class="content-body">
-            <div id="dynamic-content"></div>
-        </div>
-    </div>
+            <div class="banner-ad-container">
+                <div class="banner-ad-box">📢 [ Google Adsense / Sponsor Reklam Alanı ]</div>
+            </div>
 
-    <!-- Birebir Google Giriş Penceresi Modalı -->
-    <div class="modal-overlay" id="loginModal" onclick="handleOverlayClick(event, 'loginModal')">
-        <div class="google-popup-card">
-            <div class="google-brand">
-                <span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span>
-            </div>
-            <h2>Oturum Açın</h2>
-            <p>Klakz Hub'ı kullanmak için Google Hesabınızı kullanın</p>
-            
-            <div class="google-input-group">
-                <input type="text" id="loginName" placeholder="Adınız ve Soyadınız">
-            </div>
-            
-            <div class="google-input-group">
-                <input type="email" id="loginGmail" placeholder="E-posta veya telefon (örn: @gmail.com)">
-            </div>
-            
-            <div style="overflow: hidden; margin-top: 10px;">
-                <button class="google-btn-text" onclick="closeLoginModal()">İptal</button>
-                <button class="google-btn-primary" onclick="handleLogin()">İleri</button>
+            <div class="content-body">
+                <div id="dynamic-content"></div>
             </div>
         </div>
     </div>
@@ -237,10 +151,14 @@
     </div>
 
     <script>
-        let authState = JSON.parse(localStorage.getItem('klakz_auth')) || { isLoggedIn: false, name: '', email: '' };
+        let authState = JSON.parse(localStorage.getItem('klakz_auth')) || { isLoggedIn: false, name: '', email: '', picture: '' };
         let favorites = JSON.parse(localStorage.getItem('klakz_favorites')) || [];
         let ideasList = JSON.parse(localStorage.getItem('klakz_ideas')) || [];
         
+        // Tema Ayarı Yükleme
+        let currentTheme = localStorage.getItem('klakz_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+
         let categoryData = JSON.parse(localStorage.getItem('klakz_category_data')) || {
             roblox: {
                 title: "🔴 Roblox Scriptleri",
@@ -272,7 +190,7 @@
             },
             changelog: {
                 title: "🚀 Sürüm Notları",
-                content: `<div class="card"><h3>v3.1 Güncellemesi</h3><p style="color:var(--text-muted)">• Orijinal Google oturum açma penceresi tasarımı entegre edildi.</p></div>`
+                content: `<div class="card"><h3>v3.3 Güncellemesi</h3><p style="color:var(--text-muted)">• Discord Webhook entegrasyonu eklendi.<br>• Akıllı Giriş uyarı yönetimi ve Tema hafızası aktif edildi.</p></div>`
             },
             ideas: {
                 title: "💡 Fikrini Paylaş",
@@ -284,6 +202,20 @@
                     </div>
                     <div id="publicIdeasList"></div>
                 `
+            },
+            contact: {
+                title: "📬 İletişim ve Destek",
+                content: `
+                    <div class="card">
+                        <h3>Bize Ulaşın</h3>
+                        <p style="color:var(--text-muted)">Bir hata bildirmek, öneri sunmak veya destek almak için aşağıdaki kanalları kullanabilirsiniz:</p>
+                        <ul style="color:var(--text-main); line-height: 2; padding-left: 20px;">
+                            <li>💬 <b>Discord:</b> discord.gg/klakz</li>
+                            <li>📧 <b>E-posta:</b> destek@klakzhub.com</li>
+                            <li>💻 <b>GitHub:</b> github.com/lrbear</li>
+                        </ul>
+                    </div>
+                `
             }
         };
 
@@ -292,7 +224,64 @@
             renderSidebar();
             switchCategory('roblox');
             updateFavBadge();
+            if(localStorage.getItem('klakz_announcement_closed') === 'true') {
+                document.getElementById('announcementBar').style.display = 'none';
+            }
         });
+
+        function toggleTheme() {
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            localStorage.setItem('klakz_theme', currentTheme);
+        }
+
+        function closeAnnouncement() {
+            document.getElementById('announcementBar').style.display = 'none';
+            localStorage.setItem('klakz_announcement_closed', 'true');
+        }
+
+        // --- GOOGLE GİRİŞ YANIT FONKSİYONU ---
+        function handleCredentialResponse(response) {
+            const responsePayload = decodeJwtResponse(response.credential);
+            
+            authState = {
+                isLoggedIn: true,
+                name: responsePayload.name,
+                email: responsePayload.email,
+                picture: responsePayload.picture
+            };
+            
+            localStorage.setItem('klakz_auth', JSON.stringify(authState));
+            updateAuthUI();
+        }
+
+        function decodeJwtResponse(token) {
+            var base64Url = token.split('.')[1];
+            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        }
+
+        function handleLogout() {
+            authState = { isLoggedIn: false, name: '', email: '', picture: '' };
+            localStorage.removeItem('klakz_auth');
+            location.reload();
+        }
+
+        function updateAuthUI() {
+            const authArea = document.getElementById('authArea');
+            if(authState.isLoggedIn) {
+                authArea.innerHTML = `
+                    <div class="user-pill">
+                        ${authState.picture ? `<img src="${authState.picture}" class="user-avatar" alt="Avatar">` : '👤'}
+                        <span style="font-size:13px; font-weight:600;">${authState.name}</span>
+                        <button onclick="handleLogout()" style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:11px; padding:0; margin-left:5px;" title="Çıkış Yap">Çıkış</button>
+                    </div>
+                `;
+            }
+        }
 
         function renderSidebar() {
             let html = '';
@@ -319,45 +308,14 @@
             if(key === 'ideas') renderPublicIdeas();
         }
 
-        function handleLogin() {
-            const name = document.getElementById('loginName').value.trim();
-            const email = document.getElementById('loginGmail').value.trim();
-            if(!name || !email.includes('@gmail.com')) {
-                alert('Lütfen geçerli bir ad ve @gmail.com adresi girin!');
-                return;
-            }
-            
-            authState = { isLoggedIn: true, name, email };
-            localStorage.setItem('klakz_auth', JSON.stringify(authState));
-            closeLoginModal();
-            updateAuthUI();
-        }
-
-        function handleLogout() {
-            authState = { isLoggedIn: false, name: '', email: '' };
-            localStorage.removeItem('klakz_auth');
-            updateAuthUI();
-        }
-
-        function updateAuthUI() {
-            const authArea = document.getElementById('authArea');
-            if(authState.isLoggedIn) {
-                authArea.innerHTML = `
-                    <div class="user-pill">
-                        <span style="font-size:13px; font-weight:600;">👤 ${authState.name}</span>
-                        <button onclick="handleLogout()" style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:11px; padding:0; margin-left:5px;">Çıkış</button>
-                    </div>
-                `;
-            } else {
-                authArea.innerHTML = `<button class="submit-btn" style="width: auto; padding: 8px 16px;" onclick="openLoginModal()">👤 Gmail ile Giriş</button>`;
-            }
-        }
-
-        function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
-        function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
-        
         function openAdminPanel() {
-            if(!authState.isLoggedIn) { alert('Yönetim paneline erişmek için önce giriş yapmalısın!'); openLoginModal(); return; }
+            if(!authState.isLoggedIn) { 
+                const authArea = document.getElementById('authArea');
+                authArea.classList.add('auth-pulse');
+                setTimeout(() => authArea.classList.remove('auth-pulse'), 3000);
+                alert('Yönetim paneline erişmek için önce sağ üstten Google ile giriş yapmalısın!'); 
+                return; 
+            }
             document.getElementById('adminModal').style.display = 'flex';
             let h = '';
             for(let k in categoryData) h += `<option value="${k}">${categoryData[k].title}</option>`;
@@ -412,10 +370,22 @@
             grid.innerHTML = h;
         }
 
+        // --- DISCORD WEBHOOK GÖNDERME FONKSİYONU ---
+        function sendToDiscord(content) {
+            const webhookUrl = "BURAYA_DISCORD_WEBHOOK_URL_YAZ";
+            if(webhookUrl.includes("BURAYA")) return; // URL eklenmediyse hata vermesin
+            
+            fetch(webhookUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content: content })
+            }).catch(err => console.log("Webhook gönderilemedi:", err));
+        }
+
         function adminAddScript() {
             const g = document.getElementById('targetGameSelect').value;
             const t = document.getElementById('newScriptTitle').value;
-            const d = document.getElementById('newScriptDesc').value;
+            const d = document.getElementById('newScriptDesc'].value;
             const s = document.getElementById('newScriptStatus').value;
             const c = document.getElementById('newScriptCode').value;
             if(!t || !c) return alert('Başlık ve kod zorunludur!');
@@ -433,6 +403,10 @@
             `;
             categoryData[g].content = categoryData[g].content.replace('</div>', card + '</div>');
             localStorage.setItem('klakz_category_data', JSON.stringify(categoryData));
+            
+            // Discord'a Bildirim Gönder
+            sendToDiscord(`🚀 **Yeni Script Eklendi!**\n📌 Kategori: ${categoryData[g].title}\n📝 Başlık: ${t}\n👤 Ekleyen: ${authState.name}`);
+
             closeAdminPanel();
             alert('Script başarıyla eklendi!');
             if(currentKey === g) switchCategory(g);
@@ -444,6 +418,10 @@
             if(!p || !t) return alert('Tüm alanları doldurun.');
             ideasList.unshift({ platform: p, text: t });
             localStorage.setItem('klakz_ideas', JSON.stringify(ideasList));
+            
+            // Discord'a Fikir Bildirimi Gönder
+            sendToDiscord(`💡 **Yeni Fikir / Öneri!**\n🎮 Platform: ${p}\n💬 Mesaj: ${t}`);
+
             renderPublicIdeas();
             alert('Fikriniz iletildi!');
         }
