@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Klakz Hub | Professional v4.0 - Advanced Admin & Games</title>
+    <title>Klakz Hub | Professional v4.1 - Admin Controlled Games</title>
     
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'><rect width='100%' height='100%' rx='100' fill='%2312141c'/><path d='M160 120 v260 M200 250 L320 130 M200 250 L320 370' stroke='%2300ec64' stroke-width='45' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
 
@@ -34,7 +34,6 @@
         window.FB_Provider = provider;
         window.FB_Methods = { signInWithPopup, signOut, onAuthStateChanged, doc, setDoc, getDoc, collection, getDocs };
 
-        // Kendi Google e-posta adresini buraya yazmalısın
         const ADMIN_EMAIL = "lrbear@gmail.com"; 
 
         onAuthStateChanged(auth, async (user) => {
@@ -121,6 +120,7 @@
         .status-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; }
         .status-working { background: rgba(0, 236, 100, 0.15); color: #00ec64; border: 1px solid rgba(0, 236, 100, 0.3); }
         .status-patched { background: rgba(255, 77, 77, 0.15); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.3); }
+        .status-offline { background: rgba(160, 166, 184, 0.15); color: #a0a6b8; border: 1px solid rgba(160, 166, 184, 0.3); }
 
         .card-actions { display: flex; gap: 8px; }
         .copy-btn { flex: 1; background-color: var(--bg-input); color: var(--accent); border: 1px solid var(--accent); padding: 8px; border-radius: 6px; cursor: pointer; font-weight: bold; text-align: center; }
@@ -133,7 +133,6 @@
         .user-pill { display: flex; align-items: center; gap: 10px; background: var(--bg-input); padding: 6px 15px; border-radius: 20px; border: 1px solid var(--border-color); }
         
         .theme-toggle-btn { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 12px; }
-        
         .nav-auth-btn { background: var(--accent); color: #000; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 13px; border: none; transition: 0.2s; }
         .nav-auth-btn:hover { background: var(--accent-hover); }
 
@@ -143,7 +142,7 @@
 <body>
 
     <div id="announcementBar" class="announcement-bar">
-        <span>🎉 Klakz Hub v4.0 - Genişletilmiş Oyun Kategorileri ve Admin Kontrolü!</span>
+        <span>🎉 Klakz Hub v4.1 - Tüm Oyunlar Varsayılan Kapalı (Admin Kontrollü)!</span>
         <button onclick="closeAnnouncement()">Kapat</button>
     </div>
 
@@ -224,9 +223,10 @@
             <input type="text" id="newScriptTitle" placeholder="Script Başlığı">
             <input type="text" id="newScriptDesc" placeholder="Kısa Açıklama">
             
-            <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px;">Script Durumu (Çalışıyor mu?)</label>
+            <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px;">Script Durumu</label>
             <select id="newScriptStatus">
-                <option value="working">🟢 Çalışıyor (Aktif)</option>
+                <option value="working" selected>🟢 Çalışıyor (Aktif)</option>
+                <option value="offline">⚪️ Bakımda / Kapalı</option>
                 <option value="patched">🔴 Patched (Çalışmıyor)</option>
             </select>
 
@@ -245,37 +245,27 @@
         let currentTheme = localStorage.getItem('klakz_theme') || 'dark';
         document.documentElement.setAttribute('data-theme', currentTheme);
 
+        // Tüm oyunlar başlangıçta boş ve kapalı (admin hile ekledikçe aktifleşir)
         let categoryData = JSON.parse(localStorage.getItem('klakz_category_data')) || {
             roblox: {
                 title: "🔴 Roblox Scriptleri",
-                content: `
-                    <div class="script-grid">
-                        <div class="script-card" data-title="Blox Fruits Auto Farm" data-status="working">
-                            <div class="script-title">Blox Fruits <span class="status-badge status-working">🟢 Çalışıyor</span></div>
-                            <div class="script-desc">Otomatik level kasma scripti.</div>
-                            <div class="card-actions">
-                                <button class="copy-btn" onclick="copyScript(this)" data-code="${encodeURIComponent('loadstring(game:HttpGet("https://raw.githubusercontent.com/ornek/script.lua"))()')}">Kopyala</button>
-                                <button class="fav-btn" onclick="toggleFavorite(this, 'Blox Fruits', 'Otomatik level kasma scripti.', 'loadstring(game:HttpGet(\\'https://raw.githubusercontent.com/ornek/script.lua\\'))()')">❤️</button>
-                            </div>
-                        </div>
-                    </div>
-                `
+                content: `<div class="script-grid"><p style="color:var(--text-muted)">Şu anda aktif script bulunmuyor. Yeni hileler eklendiğinde burada görünecektir.</p></div>`
             },
             csgo: {
                 title: "🎯 CS 1.6 / Source",
-                content: `<div class="script-grid"></div>`
+                content: `<div class="script-grid"><p style="color:var(--text-muted)">Şu anda aktif script bulunmuyor. Yeni hileler eklendiğinde burada görünecektir.</p></div>`
             },
             minecraft: {
                 title: "🧱 Minecraft",
-                content: `<div class="script-grid"></div>`
+                content: `<div class="script-grid"><p style="color:var(--text-muted)">Şu anda aktif script bulunmuyor. Yeni hileler eklendiğinde burada görünecektir.</p></div>`
             },
             gta: {
                 title: "🚗 GTA V / FiveM",
-                content: `<div class="script-grid"></div>`
+                content: `<div class="script-grid"><p style="color:var(--text-muted)">Şu anda aktif script bulunmuyor. Yeni hileler eklendiğinde burada görünecektir.</p></div>`
             },
             brawl: {
                 title: "⭐ Brawl Stars",
-                content: `<div class="script-grid"></div>`
+                content: `<div class="script-grid"><p style="color:var(--text-muted)">Şu anda aktif script bulunmuyor. Yeni hileler eklendiğinde burada görünecektir.</p></div>`
             }
         };
 
@@ -292,7 +282,7 @@
             },
             changelog: {
                 title: "🚀 Sürüm Notları",
-                content: `<div class="card"><h3>v4.0 Güncellemesi</h3><p style="color:var(--text-muted)">• Oyun kategorileri güncellendi (CS 1.6/Source, Minecraft, GTA V/FiveM, Brawl Stars, Roblox).<br>• Admin paneline script durum denetimi (Çalışıyor/Patched) eklendi.</p></div>`
+                content: `<div class="card"><h3>v4.1 Güncellemesi</h3><p style="color:var(--text-muted)">• Tüm oyun kategorileri varsayılan olarak kapalı (bakımda) hale getirildi.<br>• Admin hile ekledikçe veya açtıkça kullanıcılar anında görebilecek.</p></div>`
             },
             ideas: {
                 title: "💡 Fikrini Paylaş",
@@ -552,7 +542,11 @@
             const c = document.getElementById('newScriptCode').value;
             if(!t || !c) return alert('Başlık ve kod zorunludur!');
 
-            const statusHtml = s === 'working' ? '<span class="status-badge status-working">🟢 Çalışıyor</span>' : '<span class="status-badge status-patched">🔴 Patched</span>';
+            let statusHtml = '';
+            if(s === 'working') statusHtml = '<span class="status-badge status-working">🟢 Çalışıyor</span>';
+            else if(s === 'offline') statusHtml = '<span class="status-badge status-offline">⚪️ Bakımda</span>';
+            else statusHtml = '<span class="status-badge status-patched">🔴 Patched</span>';
+
             const card = `
                 <div class="script-card" data-title="${t}" data-status="${s}">
                     <div class="script-title">${t} ${statusHtml}</div>
@@ -563,11 +557,18 @@
                     </div>
                 </div>
             `;
-            categoryData[g].content = categoryData[g].content.replace('</div>', card + '</div>');
+
+            // Eğer ilk defa script ekleniyorsa "Şu anda aktif script bulunmuyor" yazısını temizle
+            if(categoryData[g].content.includes('Şu anda aktif script bulunmuyor')) {
+                categoryData[g].content = `<div class="script-grid">${card}</div>`;
+            } else {
+                categoryData[g].content = categoryData[g].content.replace('</div>', card + '</div>');
+            }
+
             localStorage.setItem('klakz_category_data', JSON.stringify(categoryData));
             
             closeAdminPanel();
-            alert('Script başarıyla eklendi!');
+            alert('Script başarıyla eklendi ve yayınlandı!');
             if(currentKey === g) switchCategory(g);
         }
 
