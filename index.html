@@ -2,99 +2,142 @@
 <html lang="tr" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <title>Klakz Hub v4.2 - Profesyonel Yönetim</title>
-    <!-- Gerekli kütüphaneler ve Firebase aynı kalıyor -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, getCountFromServer } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-        
-        // ... (Firebase config aynı) ...
-        const firebaseConfig = { /* ... */ };
-        const app = initializeApp(firebaseConfig);
-        window.FB_Db = getFirestore(app);
-        window.FB_Auth = getAuth(app);
-        window.FB_Provider = new GoogleAuthProvider();
-        window.FB_Methods = { signInWithPopup, signOut, onAuthStateChanged, doc, setDoc, getDoc, collection, getDocs, getCountFromServer };
-    </script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klakz Hub v4.2 | Complete Admin Suite</title>
     <style>
-        /* ... (Önceki stiller aynı, sadece Toast için ekleme yapıldı) ... */
+        :root { 
+            --bg-body: #0b0c10; --bg-sidebar: #12141c; --bg-card: #15171e; 
+            --accent: #00ec64; --text-main: #ffffff; --text-muted: #a0a6b8;
+        }
+        body { background: var(--bg-body); color: var(--text-main); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; min-height: 100vh; }
+        
+        /* Toast Bildirim Sistemi */
         .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
-        .toast { background: var(--accent); color: #000; padding: 12px 20px; border-radius: 8px; margin-bottom: 10px; font-weight: bold; animation: slideIn 0.3s; }
+        .toast { 
+            background: var(--accent); color: #000; padding: 12px 24px; border-radius: 8px; 
+            margin-bottom: 10px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease-out;
+        }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+        /* Arayüz */
+        .sidebar { width: 260px; background: var(--bg-sidebar); padding: 25px; border-right: 1px solid #1f2330; }
+        .main { flex: 1; padding: 40px; }
+        .card { background: var(--bg-card); padding: 25px; border-radius: 12px; border: 1px solid #1f2330; margin-bottom: 25px; }
+        
+        button { cursor: pointer; padding: 12px 20px; border-radius: 8px; border: none; background: var(--accent); font-weight: bold; transition: 0.2s; }
+        button:hover { background: #00b34a; }
+        
+        input, textarea { width: 100%; padding: 12px; margin: 8px 0; background: #1a1c23; border: 1px solid #333; color: white; border-radius: 8px; box-sizing: border-box; }
+        h1, h2, h3 { margin-top: 0; }
     </style>
 </head>
 <body>
+
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- ... (Sidebar ve Ana içerik aynı) ... -->
+    <div class="sidebar">
+        <h2>KLAKZ HUB</h2>
+        <p style="color:var(--text-muted); font-size: 13px;">v4.2 Yönetim Paneli</p>
+        <button onclick="toggleAdminPanel()">Yönetim Panelini Aç</button>
+    </div>
 
-    <!-- Admin Paneli Modalı (İstatistik Eklendi) -->
-    <div class="modal-overlay" id="adminModal">
-        <div class="card" style="width: 520px; margin: auto;">
-            <h3>⚙️ Admin Paneli v4.2</h3>
-            
-            <div id="adminStats" style="background:var(--bg-input); padding:15px; border-radius:8px; margin-bottom:15px;">
-                <p>📊 <b>İstatistikler:</b> <span id="statCount">Yükleniyor...</span></p>
+    <div class="main">
+        <div class="card">
+            <h1>Hoş geldin, Hasan!</h1>
+            <div id="premiumCountdown" style="color: var(--accent); font-size: 18px; font-weight: bold;">
+                ⭐️ Premium Bitişine: Yükleniyor...
             </div>
-
-            <!-- ... (Diğer admin inputları) ... -->
-            <button class="submit-btn" onclick="adminAddScriptWithDiscord()">Scripti Yayınla & Discord'a Gönder</button>
+        </div>
+        
+        <div id="adminModal" class="card" style="display: none;">
+            <h3>⚙️ Admin Paneli (İstatistik & Yayın)</h3>
+            <div id="statsBox" style="background:#1a1c23; padding:15px; border-radius:8px; margin-bottom:15px;">📊 İstatistikler güncelleniyor...</div>
+            
+            <input type="text" id="scriptTitle" placeholder="Script Başlığı">
+            <textarea id="scriptDesc" rows="3" placeholder="Script Hakkında Kısa Açıklama"></textarea>
+            <input type="text" id="webhookUrl" placeholder="Discord Webhook URL">
+            
+            <button style="width: 100%;" onclick="adminPublish()">Scripti Yayınla ve Discord'a Gönder</button>
         </div>
     </div>
 
-    <script>
-        // 5. Toast Bildirim Fonksiyonu
-        function showToast(message) {
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, collection, getCountFromServer } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        // Firebase Yapılandırması
+        const firebaseConfig = { apiKey: "AIzaSyDpuJm6D9752OUXZ12L__agm3UmOI1I7Dw", projectId: "klakznew" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 1. Toast Bildirimleri
+        window.showToast = (msg) => {
             const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = message;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+            const div = document.createElement('div');
+            div.className = 'toast';
+            div.textContent = msg;
+            container.appendChild(div);
+            setTimeout(() => div.remove(), 4000);
+        };
+
+        // 2. Admin Panelini Aç/Kapat
+        window.toggleAdminPanel = () => {
+            const panel = document.getElementById('adminModal');
+            panel.style.display = (panel.style.display === 'none') ? 'block' : 'none';
+        };
+
+        // 3. İstatistikleri Çek
+        async function loadStats() {
+            try {
+                const snapshot = await getCountFromServer(collection(db, "users"));
+                document.getElementById('statsBox').innerHTML = `📊 Toplam Kayıtlı Üye Sayısı: <b>${snapshot.data().count}</b>`;
+            } catch(e) { 
+                document.getElementById('statsBox').textContent = "📊 İstatistik yüklenemedi (Firebase bağlantısı gerekli).";
+            }
         }
 
-        // 2. Discord Webhook Entegrasyonu
-        async function sendToDiscord(title, desc) {
-            const webhookUrl = "BURAYA_DISCORD_WEBHOOK_URL_YAPISTIR";
-            await fetch(webhookUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    embeds: [{ title: "🚀 Yeni Hile Yayında!", description: `**${title}**\n${desc}`, color: 0x00ec64 }]
-                })
-            });
-        }
+        // 4. Discord'a Bildirim Gönder
+        window.adminPublish = async () => {
+            const title = document.getElementById('scriptTitle').value;
+            const desc = document.getElementById('scriptDesc').value;
+            const url = document.getElementById('webhookUrl').value;
 
-        // 3. Canlı Geri Sayım
-        function startPremiumCountdown(expiry) {
-            setInterval(() => {
-                const now = Date.now();
-                const diff = expiry - now;
-                if (diff <= 0) return;
-                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((diff % (1000 * 60)) / 1000);
-                document.getElementById('countdown').innerHTML = `${d}g ${h}s ${m}d ${s}sn`;
-            }, 1000);
-        }
+            if(!title || !url) return showToast("⚠️ Hata: Başlık ve Webhook URL boş bırakılamaz!");
 
-        // 4. İstatistikleri Çek
-        async function updateAdminStats() {
-            const users = await window.FB_Methods.getCountFromServer(collection(window.FB_Db, "users"));
-            document.getElementById('statCount').innerHTML = `Toplam ${users.data().count} Kayıtlı Üye`;
-        }
+            try {
+                await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        embeds: [{ 
+                            title: "🚀 Yeni Hile Yayında!", 
+                            description: `**Başlık:** ${title}\n**Detay:** ${desc}`, 
+                            color: 30864,
+                            footer: { text: "Klakz Hub v4.2" }
+                        }]
+                    })
+                });
+                showToast("✅ Script başarıyla yayınlandı ve Discord'a iletildi!");
+            } catch(e) { showToast("❌ Discord'a gönderilirken hata oluştu."); }
+        };
 
-        // Admin butonu güncellendi
-        async function adminAddScriptWithDiscord() {
-            const t = document.getElementById('newScriptTitle').value;
-            const d = document.getElementById('newScriptDesc').value;
-            // ... (Script ekleme mantığı) ...
-            await sendToDiscord(t, d);
-            showToast("Script başarıyla eklendi ve Discord'a bildirildi!");
-        }
+        // 5. Canlı Premium Sayacı
+        const premiumExpiry = Date.now() + 86400000; // Örnek olarak 24 saat ekledim
+        setInterval(() => {
+            const diff = premiumExpiry - Date.now();
+            if(diff > 0) {
+                const h = Math.floor(diff / 3600000);
+                const m = Math.floor((diff % 3600000) / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
+                document.getElementById('premiumCountdown').innerHTML = `⭐️ Premium Bitişine: ${h}s ${m}d ${s}sn`;
+            } else {
+                document.getElementById('premiumCountdown').innerHTML = `⭐️ Premium süreniz doldu!`;
+            }
+        }, 1000);
+
+        // Başlangıçta istatistikleri yükle
+        loadStats();
     </script>
 </body>
 </html>
